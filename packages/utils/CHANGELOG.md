@@ -1,5 +1,11 @@
 # @t007/utils
 
+## 0.0.32
+
+### Patch Changes
+
+- Bug fixes and bleeding edge features
+
 ## 0.0.31
 
 ### Patch Changes

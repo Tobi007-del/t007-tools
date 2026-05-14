@@ -1,5 +1,13 @@
 # @t007/dialog
 
+## 0.0.29
+
+### Patch Changes
+
+- Bug fixes and bleeding edge features
+- Updated dependencies
+  - @t007/utils@0.0.32
+
 ## 0.0.28
 
 ### Patch Changes

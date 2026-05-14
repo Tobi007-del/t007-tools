@@ -460,7 +460,7 @@
   flex-grow: 1;
   height: fit-content;
   border-radius: calc(var(--t007-toast-unit) / 5);
-  padding: calc(var(--t007-toast-unit) / 7.5);
+  /* padding: calc(var(--t007-toast-unit) / 7.5); */
   overflow: hidden;
 }
 

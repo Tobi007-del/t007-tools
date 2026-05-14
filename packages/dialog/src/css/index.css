@@ -94,10 +94,11 @@
   filter: brightness(1.15);
 }
 
-:is(html, body):has(.t007-dialog) {
+html:has(> body > .t007-dialog),
+body:has(> .t007-dialog) {
   overflow: hidden;
 }
-body:has(.t007-dialog) {
+body:has(> .t007-dialog) {
   overflow-y: visible; /* incase anyone has sticky content */
 }
 

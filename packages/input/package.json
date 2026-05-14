@@ -1,6 +1,6 @@
 {
   "name": "@t007/input",
-  "version": "0.0.29",
+  "version": "0.0.30",
   "description": "A lightweight, pure JS input system.",
   "author": "Oketade Oluwatobiloba <tobioketade007@gmail.com>",
   "license": "MIT",
@@ -68,7 +68,7 @@
     "react-dom": "^18.3.1"
   },
   "dependencies": {
-    "@t007/utils": "^0.0.31"
+    "@t007/utils": "^0.0.32"
   },
   "peerDependencies": {
     "react": "^18.0.0"

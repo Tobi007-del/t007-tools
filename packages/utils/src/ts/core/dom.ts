@@ -8,7 +8,7 @@ export { createEl, assignEl };
 /** Exhaustive Selector used for interactive, tabbable UI controls. */
 export const INTERACTIVE_SELECTOR = ":is(button,[href],input:not([type='hidden']),select,textarea,details>summary,[contenteditable='true'],iframe,audio[controls],video[controls],[tabindex]):not([disabled],[tabindex='-1'],[data-focus-guard],[inert],[inert] *)";
 /** Check whether an event target points to an interactive element. */
-export const isInteractive = (target: EventTarget | null): target is HTMLElement => target instanceof HTMLElement && target.matches(INTERACTIVE_SELECTOR);
+export const isInteractive = (target: EventTarget | null): boolean => target instanceof HTMLElement && target.matches(INTERACTIVE_SELECTOR);
 
 // Resource Loading
 

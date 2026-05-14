@@ -54,20 +54,20 @@ export interface FormManager {
   /** Attach a fallback helper node.
    * @param field Field wrapper element.
    */
-  setFallbackHelper(field: HTMLElement): void;
+  setFallbackHelper(field: HTMLDivElement): void;
   /** Wire listeners onto a managed field.
    * @param field Field wrapper element.
    */
-  setFieldListeners(field: HTMLElement): void;
+  setFieldListeners(field: HTMLDivElement): void;
   /** Normalize field markup before use.
    * @param field Field wrapper element.
    */
-  setUpField(field: HTMLElement): void;
+  setUpField(field: HTMLDivElement): void;
   /** Create a field element from options.
    * @param options Field configuration.
    * @returns Created field element.
    */
-  field(options: FieldOptions): HTMLElement;
+  field(options: FieldOptions): HTMLDivElement;
   /** Validate a form and attach the proper hooks.
    * @param form Form element to validate.
    */
@@ -82,11 +82,11 @@ export const formManager: FormManager;
  * @param options Field configuration.
  * @returns Created field element.
  */
-export const field = FormManager["field"];
+export const field: FormManager["field"];
 /** Attach validation hooks to a form element.
  * @param form Form element to validate.
  */
-export const handleFormValidation = FormManager["handleFormValidation"];
+export const handleFormValidation: FormManager["handleFormValidation"];
 
 declare global {
   interface T007Namespace {

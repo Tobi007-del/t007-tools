@@ -18,18 +18,18 @@ declare global {
   interface Window {
     /** Shared T007 namespace. */
     t007: T007Namespace;
-    /** CDN entrypoint for @t007/toast. */
-    T007_TOAST_JS_SRC?: string;
-    /** CDN entrypoint for @t007/input. */
-    T007_INPUT_JS_SRC?: string;
-    /** CDN entrypoint for @t007/dialog. */
-    T007_DIALOG_JS_SRC?: string;
-    /** CDN stylesheet for @t007/toast. */
-    T007_TOAST_CSS_SRC?: string;
-    /** CDN stylesheet for @t007/input. */
-    T007_INPUT_CSS_SRC?: string;
-    /** CDN stylesheet for @t007/dialog. */
-    T007_DIALOG_CSS_SRC?: string;
+    /** CDN js entrypoint for `@t007/toast`, assign a symbol if bundling, e.g. `VIRTUAL_RESOURCE` from `@t007/utils`. */
+    T007_TOAST_JS_SRC?: string | symbol;
+    /** CDN js entrypoint for `@t007/input`, assign a symbol if bundling, e.g. `VIRTUAL_RESOURCE` from `@t007/utils`. */
+    T007_INPUT_JS_SRC?: string | symbol;
+    /** CDN js entrypoint for `@t007/dialog`, assign a symbol if bundling, e.g. `VIRTUAL_RESOURCE` from `@t007/utils`. */
+    T007_DIALOG_JS_SRC?: string | symbol;
+    /** CDN stylesheet for `@t007/toast`, assign a symbol if bundling, e.g. `VIRTUAL_RESOURCE` from `@t007/utils`. */
+    T007_TOAST_CSS_SRC?: string | symbol;
+    /** CDN stylesheet for `@t007/input`, assign a symbol if bundling, e.g. `VIRTUAL_RESOURCE` from `@t007/utils`. */
+    T007_INPUT_CSS_SRC?: string | symbol;
+    /** CDN stylesheet for `@t007/dialog`, assign a symbol if bundling, e.g. `VIRTUAL_RESOURCE` from `@t007/utils`. */
+    T007_DIALOG_CSS_SRC?: string | symbol;
   }
   /** Shared T007 namespace on the global object. */
   var t007: T007Namespace;

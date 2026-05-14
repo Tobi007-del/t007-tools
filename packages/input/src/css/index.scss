@@ -24,6 +24,7 @@
 /* general input state variables */
 :where(:root, .t007-input-field) {
   --t007-input-color: black;
+  --t007-input-inverse-color: rgb(from var(--t007-input-color) calc(255 - r) calc(255 - g) calc(255 - b));
   /* borders */
   --t007-input-base-color: rgb(from var(--t007-input-color) r g b / 0.45);
   --t007-input-hover-color: rgb(from var(--t007-input-color) r g b / 1);
@@ -85,6 +86,28 @@
   --t007-scroll-assist-width: calc(var(--t007-input-unit) * 2);
   --t007-scroll-assist-inset-x: calc(var(--t007-input-unit) * -0.25);
   --t007-scroll-assist-opacity: 0.4;
+  /* select input overrides */
+  --t007-input-select-appearance: base-select;
+  --t007-input-select-timing: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --t007-input-select-transition-time: 200ms;
+  --t007-input-select-picker-bg: transparent;
+  --t007-input-select-picker-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='1.5' stroke='%23000' %3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='m19.5 8.25-7.5 7.5-7.5-7.5' /%3E%3C/svg%3E%0A");
+  --t007-input-option-color: var(--t007-input-inverse-color);
+  --t007-input-option-active-color: var(--t007-input-inverse-color);
+  --t007-input-option-bg: rgb(from var(--t007-input-color) r g b / 0.777);
+  --t007-input-option-checked-bg: rgb(from var(--t007-input-checkbox-checked-background) r g b / 0.666);
+  --t007-input-option-hover-bg: rgb(from var(--t007-input-color) r g b / 0.999);
+  --t007-input-option-checked-hover-bg: rgb(from var(--t007-input-checkbox-checked-background) r g b / 0.888);
+  --t007-input-option-border: 1px solid var(--t007-input-base-color);
+  --t007-input-option-checked-border: 1px solid rgb(from var(--t007-input-checkbox-checked-background) r g b / 0.15);
+  --t007-input-option-focus-border: 1px solid var(--t007-input-focused-color);
+  --t007-input-option-blur: 3.5px;
+  --t007-input-option-entry-scale: 0.25;
+  --t007-input-option-stagger-delay: 20ms;
+  /* color input overrides */
+  --t007-input-color-height: var(--t007-input-height);
+  --t007-input-color-border: none;
+  --t007-input-color-radius: 50%;
 }
 
 /* checkbox input state variables */
@@ -93,8 +116,8 @@
   --t007-input-checkmark-width: 2px;
   --t007-input-checkbox-background: whitesmoke;
   --t007-input-checkbox-checked-background: dodgerblue;
-  --t007-input-checkbox-border-color: #707070;
-  --t007-input-checkbox-checked-border-color: black;
+  --t007-input-checkbox-border-color: rgb(from var(--t007-input-color) calc(r + 112) calc(g + 112) calc(b + 112));
+  --t007-input-checkbox-checked-border-color: var(--t007-input-inverse-color);
   --t007-input-checkbox-border-width: 1px;
   --t007-input-checkbox-border-radius: calc(var(--t007-input-unit) * 0.2);
 }
@@ -103,7 +126,7 @@
 :where(:root) {
   --t007-input-radio-color: dodgerblue;
   --t007-input-radio-background: whitesmoke;
-  --t007-input-radio-border-color: #707070;
+  --t007-input-radio-border-color: rgb(from var(--t007-input-color) calc(r + 112) calc(g + 112) calc(b + 112));
   --t007-input-radio-checked-border-color: dodgerblue;
   --t007-input-radio-checked-background: whitesmoke;
   --t007-input-radio-border-width: 1px;
@@ -368,7 +391,7 @@
 }
 
 :where(select.t007-input::picker(select)) {
-  color: black;
+  color: var(--t007-input-inverse-color);
 }
 
 .t007-input::placeholder {
@@ -388,7 +411,7 @@
   padding-left: var(--t007-input-sb-active-margin);
 }
 
-:where(.t007-input[type="file"])::file-selector-button {
+:where(.t007-input-bleeding-edge input[type="file"])::file-selector-button {
   font-family: inherit;
   font-weight: bold;
   font-size: calc(var(--t007-input-unit) / 1.25);
@@ -405,11 +428,11 @@
   transition: filter 200ms ease;
 }
 
-:where(.t007-input[type="file"])::file-selector-button:where(:active) {
+:where(.t007-input-bleeding-edge input[type="file"])::file-selector-button:where(:active) {
   border-width: 1px;
 }
 
-:where(.t007-input[type="file"])::file-selector-button:where(:hover, :focus-visible) {
+:where(.t007-input-bleeding-edge input[type="file"])::file-selector-button:where(:hover, :focus-visible) {
   filter: brightness(80%);
 }
 
@@ -762,5 +785,123 @@
     width: var(--t007-input-ripple-size);
     height: var(--t007-input-ripple-size);
     opacity: 0;
+  }
+}
+
+/* bleeding edge CSS native overrides */
+
+/* overrides for the native select */
+.t007-input-bleeding-edge :is(#o, select) {
+  white-space: nowrap;
+  @supports (appearance: base-select) {
+    &,
+    &::picker(select) {
+      appearance: var(--t007-input-select-appearance);
+    }
+    position: relative;
+    align-items: center;
+    &::picker-icon {
+      content: "";
+      position: relative;
+      width: var(--t007-input-unit);
+      height: var(--t007-input-unit);
+      background-image: var(--t007-input-select-picker-icon);
+      background-position: center;
+      background-repeat: no-repeat;
+      transition: all var(--t007-input-select-transition-time) ease-out;
+      transition-timing-function: var(--t007-input-select-timing);
+    }
+    &:open::picker-icon {
+      rotate: 180deg;
+    }
+    &:active::picker-icon {
+      translate: 0 calc(var(--t007-input-unit) / 10);
+    }
+    &::picker(select) {
+      background: var(--t007-input-select-picker-bg);
+      margin: calc(var(--t007-input-unit) / 1.34) 2px calc(var(--t007-input-unit) / 1.34) 1px;
+      border: none;
+      transition-property: display, overlay;
+      transition-duration: calc(var(--t007-input-select-transition-time) * 2.5);
+      transition-behavior: allow-discrete;
+    }
+    option {
+      position: relative;
+      backdrop-filter: blur(var(--t007-input-option-blur));
+      border-radius: calc(var(--t007-input-unit) / 4);
+      display: flex;
+      justify-content: center;
+      margin-bottom: calc(var(--t007-input-unit) / 4);
+      padding: calc(var(--t007-input-unit) / 3) calc(var(--t007-input-unit) / 2.5);
+      background: var(--t007-input-option-bg);
+      color: var(--t007-input-option-color);
+      border: var(--t007-input-option-border);
+      transition-property: opacity, scale;
+      transition-duration: var(--t007-input-select-transition-time);
+      transition-delay: calc((sibling-count() - sibling-index()) * var(--t007-input-option-stagger-delay));
+      scale: var(--t007-input-option-entry-scale);
+      opacity: 0;
+      &:is(:checked, :focus) {
+        color: var(--t007-input-option-active-color);
+      }
+      &:checked {
+        background: var(--t007-input-option-checked-bg);
+        border: var(--t007-input-option-checked-border);
+      }
+      &:focus {
+        border: var(--t007-input-option-focus-border);
+      }
+      &:hover {
+        background: var(--t007-input-option-hover-bg);
+      }
+      &:checked:hover {
+        background: var(--t007-input-option-checked-hover-bg);
+      }
+      &:focus-visible {
+        outline: none !important;
+      }
+      &::checkmark {
+        display: none;
+      }
+    }
+    &:open {
+      option {
+        scale: 1;
+        opacity: 1;
+        transition-delay: calc(sibling-index() * var(--t007-input-option-stagger-delay));
+        @starting-style {
+          scale: var(--t007-input-option-entry-scale);
+          opacity: 0;
+        }
+      }
+    }
+  }
+}
+/* overrides for the native color input */
+.t007-input-bleeding-edge:has(input[type="color"]) {
+  --t007-input-width: var(--t007-input-height);
+  --t007-input-padding: 0;
+  --t007-input-border-radius: calc(var(--t007-input-height) / 2);
+}
+.t007-input-bleeding-edge:has(input[type="color"]) .t007-input-wrapper {
+  box-shadow: 0 0 calc(var(--t007-input-unit) / 2.1) var(--input-color);
+}
+.t007-input-bleeding-edge:has(input[type="color"]) .t007-input-outline-notch {
+  max-width: 0;
+}
+.t007-input-bleeding-edge input[type="color"] {
+  width: var(--t007-input-height);
+  height: var(--t007-input-height);
+  padding: 0;
+  &::-webkit-color-swatch-wrapper {
+    padding: 0;
+  }
+  &::-webkit-color-swatch {
+    border: var(--t007-input-color-border);
+    border-radius: var(--t007-input-color-radius);
+  }
+  &::-moz-color-swatch {
+    border: var(--t007-input-color-border);
+    border-radius: var(--t007-input-color-radius);
   }
 }

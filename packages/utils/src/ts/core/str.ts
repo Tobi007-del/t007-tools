@@ -51,18 +51,25 @@ export function parseCSSSize(size: any, el?: HTMLElement): number {
 
 // Checkers
 
+/** Normalize a URL by decoding it and removing query parameters and hash fragments.
+ * @param url The URL string to clean.
+ * @returns A normalized URL string for comparison.
+ */
+export function cleanURL(url: string): string {
+  try {
+    const u = new URL(url, window.location.href);
+    return decodeURIComponent(u.origin + u.pathname);
+  } catch {
+    return url.replace(/\\/g, "/").split("?")[0].trim();
+  }
+}
+
 /** Compare two URLs after normalizing origin, pathname, and separators.
- * @param src1 First URL or path.
- * @param src2 Second URL or path.
+ * @param url1 First URL or path.
+ * @param url2 Second URL or path.
  * @returns True when both references point to the same resource.
  */
-export function isSameURL(src1: unknown, src2: unknown): boolean {
-  if (!isStr(src1) || !isStr(src2) || !src1 || !src2) return false;
-  try {
-    const u1 = new URL(src1, window.location.href),
-      u2 = new URL(src2, window.location.href);
-    return decodeURIComponent(u1.origin + u1.pathname) === decodeURIComponent(u2.origin + u2.pathname);
-  } catch {
-    return src1.replace(/\\/g, "/").split("?")[0].trim() === src2.replace(/\\/g, "/").split("?")[0].trim();
-  }
+export function isSameURL(url1: unknown, url2: unknown): boolean {
+  if (!isStr(url1) || !isStr(url2) || !url1 || !url2) return false;
+  return cleanURL(url1) === cleanURL(url2);
 }

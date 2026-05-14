@@ -8,7 +8,7 @@ import { isNativeIconType } from "../../utils/consts";
 import { useScrollAssist } from "@t007/utils/hooks/react";
 
 export const Input = React.forwardRef<t007InputElement, InputProps>(function Input(props, ref) {
-  const { isWrapper = false, label = "", type = "text", helperText, error, custom = "", className, fieldClassName, children, endIcon, ...otherProps } = props;
+  const { isWrapper = false, label = "", type = "text", helperText, error, custom = "", className = "", fieldClassName = "", children, endIcon, bleedingEdge = true, ...otherProps } = props;
   // Narrow props correctly for each case :) ts gone wild
   let options: SEP["options"] | undefined;
   let indeterminate = false;
@@ -93,7 +93,7 @@ export const Input = React.forwardRef<t007InputElement, InputProps>(function Inp
     const el = inputRef.current;
     if (!el) return;
     const form = el.closest("form");
-    setFilled(hasValue(el));
+    setFilled(hasValue(el)), el.type === "color" && (el.closest(".t007-input-field") as HTMLElement)?.style.setProperty("--input-color", el.value);
     updatePasswordStrength(el.value);
     if (custom === "confirm_password") {
       const passwordInput = form?.querySelector("[custom='password']") as HTMLInputElement;
@@ -102,7 +102,7 @@ export const Input = React.forwardRef<t007InputElement, InputProps>(function Inp
       const confirmInput = form?.querySelector("[custom='confirm_password']") as HTMLInputElement;
       if (confirmInput) confirmInput.setCustomValidity(el.value.trim() === confirmInput.value.trim() ? "" : "Both passwords do not match");
     }
-    if (el.type === "radio") el?.closest("form")?.querySelectorAll<t007InputElement>(".t007-input[name='radio']").forEach(fireInput);
+    if (el.type === "radio") form?.querySelectorAll<t007InputElement>(".t007-input[name='radio']").forEach(fireInput);
     validateInput(el);
   }, [custom, hasValue, updatePasswordStrength, validateInput]);
 
@@ -113,7 +113,7 @@ export const Input = React.forwardRef<t007InputElement, InputProps>(function Inp
 
   const Wrapper = isWrapper ? "div" : "label";
   return (
-    <div className={`t007-input-field ${fieldClassName}${isWrapper ? " t007-input-is-wrapper" : ""}${indeterminate ? " t007-input-indeterminate" : ""}${nativeIcon ? " t007-input-icon-override" : ""}${helperText === false ? " t007-input-no-helper" : ""}`}>
+    <div className={`t007-input-field ${fieldClassName}${isWrapper ? " t007-input-is-wrapper" : ""}${indeterminate ? " t007-input-indeterminate" : ""}${nativeIcon ? " t007-input-icon-override" : ""}${helperText === false ? " t007-input-no-helper" : ""}${bleedingEdge ? " t007-input-bleeding-edge" : ""}`}>
       <Wrapper className={type === "checkbox" || type === "radio" ? `t007-input-${type}-wrapper` : "t007-input-wrapper"}>
         {type === "checkbox" || type === "radio" ? (
           <>

@@ -22,7 +22,9 @@ var formManager = {
   getFilesHelper: (files, opts) => getFilesHelper(files, opts),
   formatSize: (size, decimals = 3, base = 1e3) => formatFileSize(size, decimals, base),
   togglePasswordType: (input) => (input.type = input.type === "password" ? "text" : "password"),
-  toggleFilled: (input) => input?.toggleAttribute("data-filled", input.type === "checkbox" || input.type === "radio" ? input.checked : input.value !== "" || input.files?.length > 0),
+  toggleFilled(input) {
+    input.toggleAttribute("data-filled", input.type === "checkbox" || input.type === "radio" ? input.checked : input.value !== "" || input.files?.length > 0), input.type === "color" && input.t007Field.style.setProperty("--input-color", input.value);
+  },
   setFallbackHelper(field) {
     const helperTextWrapper = field?.querySelector(".t007-input-helper-text-wrapper");
     !helperTextWrapper?.querySelector(".t007-input-helper-text[data-violation='auto']") && helperTextWrapper?.append(createEl("p", { className: "t007-input-helper-text" }, { violation: "auto" }));
@@ -62,15 +64,16 @@ var formManager = {
     initScrollAssist(field.querySelector(".t007-input-helper-text-wrapper"), { vertical: false });
   },
   setUpField(field) {
-    if (field.dataset.setUp) return;
-    t007.FM.toggleFilled(field.querySelector(".t007-input")), t007.FM.setFallbackHelper(field), t007.FM.setFieldListeners(field);
-    field.dataset.setUp = "true";
+    if (field.dataset.setup) return;
+    const input = field.querySelector(".t007-input");
+    t007.FM.toggleFilled(((input.t007Field = field), input)), t007.FM.setFallbackHelper(field), t007.FM.setFieldListeners(field);
+    field.dataset.setup = "true";
   },
-  field({ isWrapper = false, label = "", type = "text", placeholder = "", custom = "", minSize, maxSize, minTotalSize, maxTotalSize, options = [], indeterminate = false, eyeToggler = true, passwordMeter = true, helperText = {}, className = "", fieldClassName = "", children, startIcon = "", endIcon = "", nativeIcon = "", passwordVisibleIcon = "", passwordHiddenIcon = "", ...otherProps }) {
+  field({ isWrapper = false, label = "", type = "text", placeholder = "", custom = "", minSize, maxSize, minTotalSize, maxTotalSize, options = [], indeterminate = false, eyeToggler = true, passwordMeter = true, helperText = {}, className = "", fieldClassName = "", children, startIcon = "", endIcon = "", nativeIcon = "", passwordVisibleIcon = "", passwordHiddenIcon = "", bleedingEdge = true, ...otherProps }) {
     const isSelect = type === "select",
       isTextArea = type === "textarea",
       isCheckboxOrRadio = type === "checkbox" || type === "radio",
-      field = createEl("div", { className: `t007-input-field${isWrapper ? " t007-input-is-wrapper" : ""}${indeterminate ? " t007-input-indeterminate" : ""}${!!nativeIcon ? " t007-input-icon-override" : ""}${helperText === false ? " t007-input-no-helper" : ""}${fieldClassName ? ` ${fieldClassName}` : ""}` }),
+      field = createEl("div", { className: `t007-input-field${isWrapper ? " t007-input-is-wrapper" : ""}${indeterminate ? " t007-input-indeterminate" : ""}${!!nativeIcon ? " t007-input-icon-override" : ""}${helperText === false ? " t007-input-no-helper" : ""}${fieldClassName ? ` ${fieldClassName}` : ""}${bleedingEdge ? " t007-input-bleeding-edge" : ""}` }),
       labelEl = createEl("label", { className: isCheckboxOrRadio ? `t007-input-${type}-wrapper` : "t007-input-wrapper" });
     field.append(labelEl);
     if (isCheckboxOrRadio) {
@@ -161,7 +164,7 @@ var formManager = {
       form.classList.toggle("t007-input-submit-loading", false);
     });
     function toggleError(input, bool, flag = false) {
-      const field = input.closest(".t007-input-field"),
+      const field = input.t007Field,
         floatingLabel = field.querySelector(".t007-input-floating-label");
       if (bool && flag) {
         input.setAttribute("data-error", "");
@@ -170,23 +173,20 @@ var formManager = {
       toggleHelper(input, input.hasAttribute("data-error"));
     }
     function toggleHelper(input, bool) {
-      const field = input.closest(".t007-input-field"),
+      const field = input.t007Field,
         violation = t007.FM.violationKeys.find((violation) => input.Validity?.[violation] || input.validity[violation]) ?? "",
         helper = field.querySelector(`.t007-input-helper-text[data-violation="${violation}"]`),
         fallbackHelper = field.querySelector(`.t007-input-helper-text[data-violation="auto"]`);
-      input
-        .closest(".t007-input-field")
-        .querySelectorAll(`.t007-input-helper-text:not([data-violation="${violation}"])`)
-        .forEach((helper) => helper?.classList.remove("t007-input-show"));
+      input.t007Field.querySelectorAll(`.t007-input-helper-text:not([data-violation="${violation}"])`).forEach((helper) => helper?.classList.remove("t007-input-show"));
       if (helper) helper.classList.toggle("t007-input-show", bool);
       else if (fallbackHelper) (fallbackHelper.textContent = input.validationMessage), fallbackHelper.classList.toggle("t007-input-show", bool);
     }
     function updatePasswordMeter(input) {
-      const passwordMeter = input.closest(".t007-input-field").querySelector(".t007-input-password-meter");
+      const passwordMeter = input.t007Field.querySelector(".t007-input-password-meter");
       if (passwordMeter) passwordMeter.dataset.strengthLevel = `${getStrengthLevel(input.value, Number(input.minLength ?? 0))}`;
     }
     function validateInput(input, flag = false) {
-      if (form.dataset.globalError || !input?.classList.contains("t007-input")) return;
+      if (form.dataset.globalError || !input.classList.contains("t007-input")) return;
       updatePasswordMeter(input);
       let value, errorBool;
       switch (input.custom ?? input.getAttribute("custom")) {

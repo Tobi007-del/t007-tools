@@ -44,6 +44,8 @@ export interface BaseProps {
   /** End icon rendered inside the field control. */
   endIcon?: React.ReactNode;
   // onFlagError?: (args: { violation: keyof ValidityState | null; helper: string }) => void;
+  /** Whether to activate bleeding edge CSS styles that augment native styles for input types, e.g. file, color, select, e.t.c */
+  bleedingEdge?: boolean;
 }
 export type PasswordInputProps = BaseProps & InputAttributes & PasswordInputAddon;
 export type FileInputProps = BaseProps & InputAttributes & FileInputAddon;
