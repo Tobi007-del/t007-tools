@@ -1,5 +1,17 @@
 # @t007/utils
 
+## 0.0.34
+
+### Patch Changes
+
+- Dependency updates and bug fixes
+
+## 0.0.33
+
+### Patch Changes
+
+- Updated dependencies
+
 ## 0.0.32
 
 ### Patch Changes

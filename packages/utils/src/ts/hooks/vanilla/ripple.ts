@@ -2,18 +2,20 @@ import { NIL } from "sia-reactor";
 import { createEl, isInteractive } from "../../core/dom";
 
 export interface RippleConfig {
-  /** Optional explicit ripple host element. Defaults to event currentTarget. */
-  target?: HTMLElement;
+  /** Optional explicit ripple host element. @default  event currentTarget. */
+  target?: HTMLElement | null;
   /** Forces the ripple origin to the center of the host. By default, the ripple will originate from the pointer event coordinates. */
   forceCenter?: boolean;
-  /** CSS class added to the ripple wrapper element. Defaults to `"t007-ripple-wrapper"`. */
+  /** CSS class added to the ripple wrapper element. @default  `"t007-ripple-wrapper"`. */
   wrapperClassName?: string;
-  /** CSS general class added to the ripple element. Defaults to `"t007-ripple"`. */
+  /** CSS general class added to the ripple element. @default  `"t007-ripple"`. */
   className?: string;
-  /** CSS class added to the ripple element while the pointer is held down. Should contain the initial expansion animation. Defaults to `"t007-ripple-hold"`. */
+  /** CSS class added to the ripple element while the pointer is held down. Should contain the initial expansion animation. @default  `"t007-ripple-hold"`. */
   holdClassName?: string;
-  /** CSS class added to the ripple element when released. Should contain the fade-out animation. Defaults to `"t007-ripple-fade"`. */
+  /** CSS class added to the ripple element when released. Should contain the fade-out animation. @default  `"t007-ripple-fade"`. */
   fadeClassName?: string;
+  /** Maximum duration for the ripple animation, force-ejects when elapsed. @default  1000ms. */
+  maxDuration?: number;
 }
 
 /** Render and control a material-style ripple animation on an element.
@@ -25,9 +27,9 @@ export interface RippleConfig {
  * The ripple element will receive a hold class until the pointer is released, at which point it will switch to a fade class and be removed after the animation completes.
  * Pointer events that are not left-clicks or that originate from interactive elements other than the currentTarget will be ignored to prevent interference with native behaviors.
  */
-export function rippleHandler(e: RipplePointerLikeEvent, { target, forceCenter = false, wrapperClassName = "t007-ripple-wrapper", className = "t007-ripple", holdClassName = "t007-ripple-hold", fadeClassName = "t007-ripple-fade" }: RippleConfig = NIL): void {
+export function rippleHandler(e: Pick<PointerEvent, "target" | "currentTarget" | "button" | "clientX" | "clientY" | "stopPropagation">, { target, forceCenter = false, wrapperClassName = "t007-ripple-wrapper", className = "t007-ripple", holdClassName = "t007-ripple-hold", fadeClassName = "t007-ripple-fade", maxDuration = 1000 }: RippleConfig = NIL): void {
   const el = target || (e.currentTarget as HTMLElement);
-  if (!el || (e.target !== e.currentTarget && isInteractive(e.target as EventTarget)) || el.hasAttribute("disabled") || (e.pointerType === "mouse" && e.button !== 0)) return;
+  if (!el || (e.target !== e.currentTarget && isInteractive(e.target)) || el.hasAttribute("disabled") || ((e as any).pointerType === "mouse" && e.button !== 0)) return;
   e.stopPropagation?.();
 
   const { offsetWidth: rW, offsetHeight: rH } = el,
@@ -42,13 +44,15 @@ export function rippleHandler(e: RipplePointerLikeEvent, { target, forceCenter =
   ripple.addEventListener("animationend", () => (canRelease = true), { once: true });
   el.append(wrapper.appendChild(ripple).parentElement!);
 
-  const release = (): void => {
-    if (!canRelease) return ripple.addEventListener("animationend", release, { once: true });
+  let released = false;
+  const release = (force: any): void => {
+    if (released) return;
+    if (!canRelease && force !== true) return ripple.addEventListener("animationend", release, { once: true }), void setTimeout(release, maxDuration, true); // we still don't trust you
+    released = true;
     ripple.classList.replace(holdClassName, fadeClassName);
-    ripple.addEventListener("animationend", () => setTimeout(() => wrapper.remove()));
+    ripple.addEventListener("animationend", () => setTimeout(() => wrapper.remove())), setTimeout(() => wrapper.remove(), maxDuration); // we still don't trust you
     for (const evt of ["pointerup", "pointercancel"]) (el.ownerDocument?.defaultView || window).removeEventListener(evt, release);
   };
 
   for (const evt of ["pointerup", "pointercancel"]) (el.ownerDocument?.defaultView || window).addEventListener(evt, release);
 }
-type RipplePointerLikeEvent = Pick<PointerEvent, "target" | "currentTarget" | "pointerType" | "button" | "clientX" | "clientY" | "stopPropagation">;

@@ -40,12 +40,12 @@
   --t007-dialog-button-border-radius: calc(var(--t007-dialog-unit) * 1.25);
   --t007-dialog-button-gap: calc(var(--t007-dialog-unit) * 0.65);
   /* colors */
-  --t007-confirm-button-color: grey;
-  --t007-confirm-button-background: var(--t007-cancel-button-color);
-  --t007-cancel-button-color: greenyellow;
-  --t007-cancel-button-background: var(--t007-confirm-button-color);
-  --t007-confirm-button-outline-color: var(--t007-cancel-button-color);
-  --t007-cancel-button-outline-color: var(--t007-cancel-button-color);
+  --t007-dialog-confirm-button-color: grey;
+  --t007-dialog-confirm-button-background: var(--t007-dialog-cancel-button-color);
+  --t007-dialog-cancel-button-color: greenyellow;
+  --t007-dialog-cancel-button-background: var(--t007-dialog-confirm-button-color);
+  --t007-dialog-confirm-button-outline-color: var(--t007-dialog-cancel-button-color);
+  --t007-dialog-cancel-button-outline-color: var(--t007-dialog-cancel-button-color);
 }
 
 :where(.t007-dialog) .t007-input-field {
@@ -236,14 +236,14 @@ body:has(> .t007-dialog) {
 }
 
 .t007-dialog-confirm-button {
-  color: var(--t007-confirm-button-color);
-  background: var(--t007-confirm-button-background);
+  color: var(--t007-dialog-confirm-button-color);
+  background: var(--t007-dialog-confirm-button-background);
   opacity: 1;
 }
 
 .t007-dialog-cancel-button {
-  color: var(--t007-cancel-button-color);
-  background: var(--t007-cancel-button-background);
+  color: var(--t007-dialog-cancel-button-color);
+  background: var(--t007-dialog-cancel-button-background);
   opacity: 0.9;
 }
 
@@ -265,9 +265,9 @@ body:has(> .t007-dialog) {
 }
 
 .t007-dialog-confirm-button:focus {
-  outline-color: var(--t007-confirm-button-outline-color);
+  outline-color: var(--t007-dialog-confirm-button-outline-color);
 }
 
 .t007-dialog-cancel-button:focus {
-  outline-color: var(--t007-cancel-button-outline-color);
+  outline-color: var(--t007-dialog-cancel-button-outline-color);
 }

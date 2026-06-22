@@ -1,9 +1,9 @@
 import { useMemo } from "react";
 
 export interface HighlightOptions {
-  /** Whether to trim individual query strings. Defaults to `true`. */
+  /** Whether to trim individual query strings. @default  `true`. */
   trimQuery?: boolean;
-  /** Whether to match whole words only. Defaults to `false`. */
+  /** Whether to match whole words only. @default  `false`. */
   wholeWord?: boolean;
 }
 

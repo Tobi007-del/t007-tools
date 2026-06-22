@@ -230,6 +230,8 @@ class T007_Toast {
     e.preventDefault();
     if (this._ptrTicker) return;
     this._ptrRAF = requestAnimationFrame(() => {
+      const selection = window.getSelection();
+      if (selection?.toString().length && this.toastElement.contains(selection.anchorNode)) return this._handleToastPointerUp(e); // Snub the drag: clear tracking and let the text highlight win
       const has = (str) => this.opts.dragToCloseDir.includes(str),
         x = e.clientX ?? e.targetTouches[0]?.clientX,
         y = e.clientY ?? e.targetTouches[0]?.clientY;
@@ -276,8 +278,8 @@ class T007_Toast {
     if (!this.toastElement.querySelector(".t007-toast-body")) imageWrapper().insertAdjacentElement("afterend", createEl("div", { className: "t007-toast-body" }));
   }
   _cleanUpToast() {
-    const container = this.toastElement.parentElement;
-    this.toastElement.remove();
+    const container = this.toastElement?.parentElement;
+    this.toastElement?.remove();
     if (!container?.hasChildNodes()) container?.remove();
     this.inactive = true;
   }
@@ -314,16 +316,16 @@ export const toasting = {
       (response) => {
         const successConfig = NFC(success || "Promise resolved", "success");
         const { render, bodyHTML } = successConfig;
-        if (isFunc(render)) successConfig.render = (response) => render(response); // preserving as functions that receive the response
-        if (isFunc(bodyHTML)) successConfig.bodyHTML = (response) => bodyHTML(response);
+        if (isFunc(render)) successConfig.render = (txt = response) => render(txt); // preserving as functions that receive the response
+        if (isFunc(bodyHTML)) successConfig.bodyHTML = (txt = response) => bodyHTML(txt);
         base.success(pendingId, successConfig);
         return response;
       },
       (err) => {
         const errorConfig = NFC(error || "Promise rejected", "error");
         const { render, bodyHTML } = errorConfig;
-        if (isFunc(render)) errorConfig.render = (err) => render(err);
-        if (isFunc(bodyHTML)) errorConfig.bodyHTML = (err) => bodyHTML(err);
+        if (isFunc(render)) errorConfig.render = (txt = err) => render(txt);
+        if (isFunc(bodyHTML)) errorConfig.bodyHTML = (txt = err) => bodyHTML(txt);
         base.error(pendingId, errorConfig);
         return Promise.reject(err);
       }

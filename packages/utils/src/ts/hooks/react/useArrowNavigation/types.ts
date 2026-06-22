@@ -1,37 +1,37 @@
 export type KeyEvent = Partial<KeyboardEvent> & Pick<KeyboardEvent, "key">;
 
 export type Config = {
-  /** Enables or disables navigation logic. Defaults to `null`. */
+  /** Enables or disables navigation logic. @default  `null`. */
   enabled?: boolean | null;
-  /** CSS selector used to collect focusable nav items. Defaults to `"[data-arrow-item]"` */
+  /** CSS selector used to collect focusable nav items. @default  `"[data-arrow-item]"` */
   selector?: string;
-  /** Whether hover should also move active selection. Defaults to `true`. */
+  /** Whether hover should also move active selection. @default  `true`. */
   focusOnHover?: boolean;
-  /** Whether directional movement wraps around edges. Defaults to `true`. */
+  /** Whether directional movement wraps around edges. @default  `true`. */
   loop?: boolean;
-  /** Enables virtual focus (aria-activedescendant) mode. Defaults to `false`. */
+  /** Enables virtual focus (aria-activedescendant) mode. @default  `false`. */
   virtual?: boolean;
-  /** Enables alphanumeric type-ahead matching. Defaults to `false`. */
+  /** Enables alphanumeric type-ahead matching. @default  `false`. */
   typeahead?: boolean;
-  /** Idle timeout before clearing type-ahead buffer (ms). Defaults to `500`. */
+  /** Idle timeout before clearing type-ahead buffer (ms). @default  `500`. */
   resetMs?: number;
-  /** Explicit RTL override; null auto-detects from computed style. Defaults to `null`. */
+  /** Explicit RTL override; null auto-detects from computed style. @default  `null`. */
   rtl?: boolean | null;
-  /** Enables roving tabindex when not in virtual mode. Defaults to `null`. */
+  /** Enables roving tabindex when not in virtual mode. @default  `null`. */
   rovingTab?: boolean | null;
-  /** Default tabbable index when no active item is selected. Defaults to `null`. */
+  /** Default tabbable index when no active item is selected. @default  `null`. */
   defaultTabbableIndex?: number | null;
-  /** Base tabindex for non-active items, use `"-1"` to kill virtual list. Defaults to `"0"`. */
+  /** Base tabindex for non-active items, use `"-1"` to kill virtual list. @default  `"0"`. */
   baseTabIndex?: string;
-  /** Class applied to active item in virtual mode. Defaults to `"focus-outlined"`. */
+  /** Class applied to active item in virtual mode. @default  `"focus-outlined"`. */
   activeClass?: string;
-  /** Selector used for keyboard event source in virtual mode. Defaults to `"input[value],textarea,[contenteditable='true']"`. */
+  /** Selector used for keyboard event source in virtual mode. @default  `"input[value],textarea,[contenteditable]"`. */
   inputSelector?: string;
-  /** Scroll behavior options used when moving active item. Defaults to `{ block: "nearest", inline: "nearest" }`. */
+  /** Scroll behavior options used when moving active item. @default  `{ block: "nearest", inline: "nearest" }`. */
   scrollIntoView?: ScrollIntoViewOptions;
-  /** Focus behavior options used in non-virtual mode. Defaults to `{ preventScroll: false }`. */
+  /** Focus behavior options used in non-virtual mode. @default  `{ preventScroll: false }`. */
   focusOptions?: FocusOptions;
-  /** Explicit or computed grid dimensions for navigation math. Defaults to `{}`. */
+  /** Explicit or computed grid dimensions for navigation math. @default  `{}`. */
   grid?: Partial<Record<"x" | "y" | "vY", number>>;
   /** Callback fired when an item becomes active/selected. */
   onSelect?: (el: HTMLElement, e: KeyEvent) => void;

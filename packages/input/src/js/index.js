@@ -168,7 +168,7 @@ var formManager = {
         floatingLabel = field.querySelector(".t007-input-floating-label");
       if (bool && flag) {
         input.setAttribute("data-error", "");
-        floatingLabel?.classList.add("t007-input-shake"), setTimeout(() => floatingLabel?.classList.remove("t007-input-shake"), 520);
+        floatingLabel?.classList.add("t007-input-shake"), setTimeout(() => floatingLabel?.classList.remove("t007-input-shake"), 520); // we still don't trust you
       } else if (!bool) input.removeAttribute("data-error");
       toggleHelper(input, input.hasAttribute("data-error"));
     }
@@ -245,7 +245,7 @@ var formManager = {
       form.querySelectorAll(".t007-input-field").forEach((field) => {
         field.querySelector(".t007-input")?.toggleAttribute("data-error", bool);
         const floatingLabel = field.querySelector(".t007-input-floating-label");
-        floatingLabel?.classList.toggle("t007-input-shake", bool), bool && setTimeout(() => floatingLabel?.classList.remove("t007-input-shake"), 520);
+        floatingLabel?.classList.toggle("t007-input-shake", bool), bool && setTimeout(() => floatingLabel?.classList.remove("t007-input-shake"), 520); // we still don't trust you
       });
     }
   },

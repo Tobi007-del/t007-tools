@@ -71,7 +71,7 @@ export interface ToastOptions {
   onClose?: (timeElapsed?: boolean | false) => void;
   /** Callback fired as the toast auto-close timer advances. */
   onTimeUpdate?: (timeVisible: number) => void;
-  [key: string]: any; // To allow arbitrary overrides internally if needed
+  // [key: string]: any; // To allow arbitrary overrides internally if needed
 }
 
 /** Live toast instance returned by the runtime. */

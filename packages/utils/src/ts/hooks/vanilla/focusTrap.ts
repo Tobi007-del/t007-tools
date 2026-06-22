@@ -2,17 +2,17 @@ import { createEl, getActiveEl as active, INTERACTIVE_SELECTOR } from "../../cor
 import { NIL } from "sia-reactor";
 
 export interface FocusTrapConfig {
-  /** Enables or disables the focus trap. Defaults to `false`. */
+  /** Enables or disables the focus trap. @default  `false`. */
   enabled?: boolean;
-  /** The preferred initial focus target selector within the element, overrides whatever was focused. Try `autofocus` attribute if working with dialogs before this. Defaults to `[data-autofocus]`. */
+  /** The preferred initial focus target selector within the element, overrides whatever was focused. Try `autofocus` attribute if working with dialogs before this. @default  `[data-autofocus]`. */
   initialSelector?: string;
-  /** The class name for the initial focus ring since programmatic focus is not always visible, `autofocus` attribute in dialogs might work fine as an alternative. Defaults to `"focus-outline"`. */
+  /** The class name for the initial focus ring since programmatic focus is not always visible, `autofocus` attribute in dialogs might work fine as an alternative. @default  `"focus-outline"`. */
   ringClassName?: string;
-  /** Optional root used to scope focus listeners to an element instead of the window. Defaults to `window`. */
+  /** Optional root used to scope focus listeners to an element instead of the window. @default  `window`. */
   root?: HTMLElement | Document | Window;
-  /** Whether the focus trap is scoped to the root provided it is an HTMLElement. Defaults to `true`. */
+  /** Whether the focus trap is scoped to the root provided it is an HTMLElement. @default  `true`. */
   scoped?: boolean;
-  /** Passed down to all event listeners used. Defaults to `true`. */
+  /** Passed down to all event listeners used. @default  `true`. */
   capture?: boolean;
 }
 

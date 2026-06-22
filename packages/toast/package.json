@@ -1,6 +1,6 @@
 {
   "name": "@t007/toast",
-  "version": "0.0.30",
+  "version": "0.0.32",
   "description": "A lightweight, pure JS toast system.",
   "author": "Oketade Oluwatobiloba <tobioketade007@gmail.com>",
   "license": "MIT",
@@ -21,7 +21,8 @@
   "types": "./dist/index.d.ts",
   "style": "./dist/index.css",
   "sideEffects": [
-    "*.css"
+    "**/*.css",
+    "**/*.scss"
   ],
   "exports": {
     ".": {
@@ -54,7 +55,7 @@
     "promise"
   ],
   "dependencies": {
-    "@t007/utils": "^0.0.32"
+    "@t007/utils": "^0.0.34"
   },
   "devDependencies": {
     "esbuild-sass-plugin": "^3.7.0"

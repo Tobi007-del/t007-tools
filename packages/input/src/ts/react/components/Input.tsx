@@ -9,7 +9,7 @@ import { useScrollAssist } from "@t007/utils/hooks/react";
 
 export const Input = React.forwardRef<t007InputElement, InputProps>(function Input(props, ref) {
   const { isWrapper = false, label = "", type = "text", helperText, error, custom = "", className = "", fieldClassName = "", children, endIcon, bleedingEdge = true, ...otherProps } = props;
-  // Narrow props correctly for each case :) ts gone wild
+  // Narrow props correctly for each case, ts gone wild
   let options: SEP["options"] | undefined;
   let indeterminate = false;
   let minLength: number | undefined;
@@ -85,7 +85,7 @@ export const Input = React.forwardRef<t007InputElement, InputProps>(function Inp
       const shouldFlagError = flagError ? errorBool : (formFlag || flag) && errorBool;
       const shouldRenotify = (formFlag || flag) && shouldFlagError;
       setFlagError(shouldFlagError), setRenotify(shouldRenotify);
-      shouldRenotify && setTimeout(() => setRenotify(false), 520);
+      shouldRenotify && setTimeout(() => setRenotify(false), 520); // we still don't trust you
     },
     [minSize, maxSize, maxTotalSize, minTotalSize, minLength, maxLength, flagError, helperTextMap]
   );

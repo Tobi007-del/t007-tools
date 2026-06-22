@@ -13,13 +13,13 @@ export interface ScrollAssistHandle {
 
 /** Configuration for scroll assist overlays. */
 export interface ScrollAssistConfig {
-  /** Scroll speed in pixels per second. Defaults to `80`. */
+  /** Scroll speed in pixels per second. @default  `80`. */
   pxPerSecond?: number;
-  /** Class name applied to assist overlays. Defaults to `"t007-scroll-assist"`. */
+  /** Class name applied to assist overlays. @default  `"t007-scroll-assist"`. */
   assistClassName?: string;
-  /** Enable vertical assist overlays. Defaults to `true`. */
+  /** Enable vertical assist overlays. @default  `true`. */
   vertical?: boolean;
-  /** Enable horizontal assist overlays. Defaults to `true`. */
+  /** Enable horizontal assist overlays. @default  `true`. */
   horizontal?: boolean;
 }
 

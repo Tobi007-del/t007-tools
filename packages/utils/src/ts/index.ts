@@ -1,7 +1,8 @@
 import { VIRTUAL_RESOURCE } from "./core/dom";
 
-// Global Types
+// Types
 export type * from "./types/global.d.ts";
+export type * from "./types/str.d.ts";
 // Core
 export { NIL, NOOP } from "sia-reactor";
 export * from "./core/obj";
@@ -23,3 +24,6 @@ if ("undefined" !== typeof window) {
   window.T007_INPUT_CSS_SRC ??= `https://cdn.jsdelivr.net/npm/@t007/input@latest/dist/index.min.css`;
   window.T007_DIALOG_CSS_SRC ??= `https://cdn.jsdelivr.net/npm/@t007/dialog@latest/dist/index.min.css`;
 }
+
+// For purging CDNS
+// https://cdn.jsdelivr.net/npm/@t007/toast@latest, https://cdn.jsdelivr.net/npm/@t007/input@latest, https://cdn.jsdelivr.net/npm/@t007/dialog@latest, https://cdn.jsdelivr.net/npm/@t007/toast@latest/dist/index.min.css, https://cdn.jsdelivr.net/npm/@t007/input@latest/dist/index.min.css, https://cdn.jsdelivr.net/npm/@t007/dialog@latest/dist/index.min.css

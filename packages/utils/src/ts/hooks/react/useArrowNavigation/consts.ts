@@ -19,7 +19,7 @@ export const DEFAULT_CONFIG: Required<Config> = {
   rtl: null,
   grid: {},
   activeClass: "focus-outlined",
-  inputSelector: "input,textarea,[contenteditable='true']",
+  inputSelector: "input,textarea,[contenteditable]",
   focusOptions: { preventScroll: false },
   scrollIntoView: { block: "nearest", inline: "nearest" },
   onSelect: NOOP,

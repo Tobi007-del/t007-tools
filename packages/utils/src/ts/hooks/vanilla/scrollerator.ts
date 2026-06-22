@@ -1,21 +1,20 @@
 import { NIL } from "sia-reactor";
-import { createEl } from "../..";
 
 /** Configuration for the vertical edge-scrolling helper. */
 interface ScrolleratorOptions {
-  /** Starting lines-per-second speed. Defaults to `3`. */
+  /** Starting lines-per-second speed. @default  `3`. */
   baseSpeed?: number;
-  /** Maximum accelerated speed. Defaults to `10`. */
+  /** Maximum accelerated speed. @default  `10`. */
   maxSpeed?: number;
-  /** Delay before acceleration kicks in. Defaults to `2000`. */
+  /** Delay before acceleration kicks in. @default  `2000`. */
   stepDelay?: number;
-  /** Base frame rate used to estimate movement. Defaults to `16`. */
+  /** Base frame rate used to estimate movement. @default  `16`. */
   baseRate?: number;
-  /** Approximate line height in pixels. Defaults to `80`. */
+  /** Approximate line height in pixels. @default  `80`. */
   lineHeight?: number;
-  /** Edge margin that triggers scrolling. Defaults to `80`. */
+  /** Edge margin that triggers scrolling. @default  `80`. */
   margin?: number;
-  /** Scroll container or window target. Defaults to `window`. */
+  /** Scroll container or window target. @default  `window`. */
   car?: Window | HTMLElement;
 }
 
@@ -43,7 +42,7 @@ export function initVScrollerator({ baseSpeed = 3, maxSpeed = 10, stepDelay = 20
       accelId === null ? (accelId = setTimeout(() => (linesPerSec += 1), stepDelay)) : linesPerSec > baseSpeed && (linesPerSec = Math.min(linesPerSec + 1, maxSpeed));
       (car as any).scrollBy?.(0, clientY < margin ? -speed : speed);
     } else reset();
-    return ((lastTime = !brake ? now : null), speed);
+    return (lastTime = !brake ? now : null), speed;
   };
   const reset = () => (accelId && clearTimeout(accelId), (accelId = null), (linesPerSec = baseSpeed), (lastTime = null));
   return { drive, reset };

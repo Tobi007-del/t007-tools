@@ -1,5 +1,5 @@
 import "@t007/utils";
-import { BaseProps, CheckboxInputAddon, DateInputAddon, FileInputAddon, SelectElementAddon } from "../react";
+import { t007InputElement, BaseProps, CheckboxInputAddon, DateInputAddon, FileInputAddon, SelectElementAddon } from "../react";
 
 interface BaseOptions extends Omit<BaseProps, "error"> {
   /** Visible label text. */
@@ -50,7 +50,7 @@ export interface FormManager {
   /** Toggle the filled state on a supported field.
    * @param input Supported form control.
    */
-  toggleFilled(input: HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement): void;
+  toggleFilled(input: t007InputElement): void;
   /** Attach a fallback helper node.
    * @param field Field wrapper element.
    */
@@ -67,7 +67,10 @@ export interface FormManager {
    * @param options Field configuration.
    * @returns Created field element.
    */
-  field(options: FieldOptions): HTMLDivElement;
+  field(options: SelectFieldOptions): HTMLDivElement & { inputEl: HTMLSelectElement };
+  field(options: TextareaFieldOptions): HTMLDivElement & { inputEl: HTMLTextAreaElement };
+  field(options: PasswordFieldOptions | FileFieldOptions | CheckboxFieldOptions | DateFieldOptions | GenericFieldOptions): HTMLDivElement & { inputEl: HTMLInputElement };
+  field(options: FieldOptions): HTMLDivElement & { inputEl: t007InputElement };
   /** Validate a form and attach the proper hooks.
    * @param form Form element to validate.
    */
@@ -95,9 +98,9 @@ declare global {
     /** Public form manager singleton. */
     formManager: FormManager;
     /** Public field factory. */
-    field?: FormManager["field"];
+    field: FormManager["field"];
     /** Public form validation helper. */
-    handleFormValidation?: FormManager["handleFormValidation"];
+    handleFormValidation: FormManager["handleFormValidation"];
   }
   interface Window {
     field?: T007Namespace["field"];

@@ -2,25 +2,25 @@ import { isInteractive } from "../../core/dom";
 import { NIL, NOOP } from "sia-reactor";
 
 export interface OutsideClickConfig {
-  /** Enables or disables outside-click handling. Defaults to `false`. */
+  /** Enables or disables outside-click handling. @default  `false`. */
   enabled?: boolean;
-  /** Callback invoked when an outside interaction is detected. Defaults to `()=>{}`. */
+  /** Callback invoked when an outside interaction is detected. @default  `()=>{}`. */
   onOutside?: (e: MouseEvent | TouchEvent | KeyboardEvent | FocusEvent) => void;
-  /** Whether pointer/touch outside interactions should trigger callback. Defaults to `true`. */
+  /** Whether pointer/touch outside interactions should trigger callback. @default  `true`. */
   outOnClick?: boolean;
-  /** Whether Escape key should trigger callback. Defaults to `true`. */
+  /** Whether Escape key should trigger callback. @default  `true`. */
   outOnEscape?: boolean;
-  /** Whether focus leaving the container should trigger callback. Defaults to `false`. */
+  /** Whether focus leaving the container should trigger callback. @default  `false`. */
   outOnFocusOut?: boolean;
-  /** Allow only clicks inside `el` bounding client rectangle to be considered valid, otherwise uses `el.contains(target)`. Defaults to `false . */
+  /** Allow only clicks inside `el` bounding client rectangle to be considered valid, otherwise uses `el.contains(target)`. @default  `false . */
   allowBounds?: boolean;
-  /** Allow interactive elements including outsiders to bypass click callback. Defaults to `false`. */
+  /** Allow interactive elements including outsiders to bypass click callback. @default  `false`. */
   allowInputs?: boolean;
-  /** Optional root used to scope focus listeners to an element instead of the window. Defaults to `window`. */
+  /** Optional root used to scope focus listeners to an element instead of the window. @default  `window`. */
   root?: HTMLElement | Document | Window;
-  /** Whether the outside click handling is scoped to the root provided it is an HTMLElement. Defaults to `true`. */
+  /** Whether the outside click handling is scoped to the root provided it is an HTMLElement. @default  `true`. */
   scoped?: boolean;
-  /** Passed down to all event listeners used. Defaults to `true`. */
+  /** Passed down to all event listeners used. @default  `true`. */
   capture?: boolean;
 }
 

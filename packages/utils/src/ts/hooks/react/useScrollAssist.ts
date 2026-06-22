@@ -5,7 +5,7 @@ import { NIL } from "sia-reactor";
 
 /** Configuration options for the `useScrollAssist` hook. */
 interface UseScrollAssistConfig extends ScrollAssistConfig {
-  /** Enables or disables the scroll assist. Defaults to `true`. */
+  /** Enables or disables the scroll assist. @default  `true`. */
   enabled?: boolean;
 }
 
