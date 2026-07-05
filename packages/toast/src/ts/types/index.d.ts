@@ -1,13 +1,15 @@
 import "@t007/utils";
 
 /** Toast severity level. */
-export type ToastType = "info" | "success" | "error" | "warning";
+export type ToastType = undefined | "info" | "success" | "error" | "warning";
 /** Screen anchor for toast placement. */
 export type ToastPosition = "top-left" | "top-center" | "top-right" | "bottom-left" | "bottom-center" | "bottom-right" | "center-left" | "center-center" | "center-right";
 /** Motion preset used when a toast enters or leaves the screen. */
 export type ToastAnimation = "fade" | "zoom" | "slide" | "slide-left" | "slide-right" | "slide-up" | "slide-down" | boolean;
+/** Allowed pointer types for drag-to-dismiss gestures. */
+export type ToastDragOption = boolean | "mouse" | "touch" | "pen";
 /** Allowed drag directions for dismiss gestures. `|` combines axes where it can be `a` or `b` and can change anytime while `||` does not change after a pick is determined. */
-export type ToastDragDir = "x" | "y" | "xy" | "x|y" | "x||y" | "x+" | "x-" | "y+" | "y-" | "xy+" | "xy-" | "x|y+" | "x|y-" | "x||y+" | "x||y-";
+export type ToastDragDirection = "x" | "y" | "xy" | "x|y" | "x||y" | "x+" | "x-" | "y+" | "y-" | "xy+" | "xy-" | "x|y+" | "x|y-" | "x||y+" | "x||y-";
 
 /** Configuration object for creating and updating a toast. */
 export interface ToastOptions {
@@ -48,11 +50,11 @@ export interface ToastOptions {
   /** Pause auto-close while the document is hidden. */
   pauseOnFocusLoss?: boolean;
   /** Enable drag-to-dismiss gestures and optionally limit pointer types. */
-  dragToClose?: boolean | "mouse" | "pen" | "touch";
+  dragToClose?: ToastDragOption;
   /** Percentage threshold needed to dismiss by drag. */
   dragToClosePercent?: number | { x?: number; y?: number };
   /** Axis or direction filter used by the drag gesture system. */
-  dragToCloseDir?: ToastDragDir;
+  dragToCloseDir?: ToastDragDirection;
   /** When true and `tag` is provided, any other active toast with the same tag is removed before this toast renders. */
   renotify?: boolean;
   /** Arbitrary tag used for grouping and renotify matching. Does not update by itself; pair with `renotify` to enforce one-toast-per-tag behavior. */
@@ -71,6 +73,8 @@ export interface ToastOptions {
   onClose?: (timeElapsed?: boolean | false) => void;
   /** Callback fired as the toast auto-close timer advances. */
   onTimeUpdate?: (timeVisible: number) => void;
+  /** Abort signal to control the toast's lifecycle and timeout aborts. */
+  signal?: AbortSignal;
   // [key: string]: any; // To allow arbitrary overrides internally if needed
 }
 
@@ -103,6 +107,8 @@ export interface ToastInstance {
    * @param timeElapsed Whether the auto-close timer already elapsed.
    */
   remove(manner?: "smooth" | "instant", timeElapsed?: boolean): void;
+  /** Dismiss the toast immediately without any exit animation. */
+  abort(): void;
 }
 
 /** Promise state configuration used by toast.promise. */
@@ -227,6 +233,12 @@ export function toaster(defOptions?: ToastOptions, groupId?: string): Toast;
 declare const toast: Toast;
 export default toast;
 
+export declare const TOAST_UI_POSITIONS: { value: ToastPosition; display: string }[];
+export declare const TOAST_UI_ANIMATIONS: { value: ToastAnimation; display: string }[];
+export declare const TOAST_UI_TYPES: { value: ToastType; display: string }[];
+export declare const TOAST_UI_DRAG_OPTIONS: { value: ToastDragOption; display: string }[];
+export declare const TOAST_UI_DRAG_DIRECTIONS: { value: ToastDragDirection; display: string }[];
+
 declare global {
   interface T007Namespace {
     /** Default toast factory instance. */
@@ -245,6 +257,11 @@ declare global {
     TOAST_VIBRATIONS: Record<ToastType, number[]>;
     /** Default SVG icons by toast type. */
     TOAST_ICONS: Record<ToastType | "loading", string>;
+    TOAST_UI_POSITIONS: typeof TOAST_UI_POSITIONS;
+    TOAST_UI_ANIMATIONS: typeof TOAST_UI_ANIMATIONS;
+    TOAST_UI_TYPES: typeof TOAST_UI_TYPES;
+    TOAST_UI_DRAG_OPTS: typeof TOAST_UI_DRAG_OPTIONS;
+    TOAST_UI_DRAG_DIRS: typeof TOAST_UI_DRAG_DIRECTIONS;
   }
   interface Window {
     toast?: Toast;

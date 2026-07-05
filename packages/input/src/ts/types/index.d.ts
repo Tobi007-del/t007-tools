@@ -1,5 +1,12 @@
 import "@t007/utils";
-import { t007InputElement, BaseProps, CheckboxInputAddon, DateInputAddon, FileInputAddon, SelectElementAddon } from "../react";
+import { dateTypes, nativeIconTypes } from "../utils/consts";
+import type { t007InputElement, BaseProps, CheckboxInputAddon, DateInputAddon, FileInputAddon, SelectElementAddon } from "../react/types";
+
+/** Union of all supported native date-like input types. */
+export type DateType = (typeof dateTypes)[number];
+
+/** Union of all supported inputs with native icons types. */
+export type NativeIconType = (typeof nativeIconTypes)[number];
 
 interface BaseOptions extends Omit<BaseProps, "error"> {
   /** Visible label text. */
@@ -8,13 +15,13 @@ interface BaseOptions extends Omit<BaseProps, "error"> {
   children?: HTMLElement;
 }
 type InputAttrs = Partial<Omit<HTMLInputElement, "type" | "children">>;
-type SelectAttrs = Partial<Omit<HTMLSelectElement, "type" | "children">>;
+type SelectAttrs = Partial<Omit<HTMLSelectElement, "type" | "children" | "options">>;
 type TextareaAttrs = Partial<Omit<HTMLTextAreaElement, "type" | "children">>;
 type PasswordFieldOptions = BaseOptions & InputAttrs & Omit<FileInputAddon, "passwordVisibleIcon" | "passwordHiddenIcon"> & { passwordVisibleIcon?: HTMLElement; passwordHiddenIcon?: HTMLElement };
 type FileFieldOptions = BaseOptions & InputAttrs & FileInputAddon;
 type CheckboxFieldOptions = BaseOptions & InputAttrs & CheckboxInputAddon;
 type DateFieldOptions = BaseOptions & InputAttrs & DateInputAddon;
-type GenericFieldOptions = BaseOptions & InputAttrs & { type?: Exclude<HTMLInputElement["type"], "password" | "file" | "checkbox" | NativeType> };
+type GenericFieldOptions = BaseOptions & InputAttrs & { type?: Exclude<HTMLInputElement["type"], "password" | "file" | "checkbox" | DateType> };
 type TextareaFieldOptions = BaseOptions & TextareaAttrs & { type: "textarea" };
 type SelectFieldOptions = BaseOptions & SelectAttrs & SelectElementAddon;
 /** Configuration accepted by the field() helper. */

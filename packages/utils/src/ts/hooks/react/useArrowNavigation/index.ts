@@ -19,7 +19,7 @@ export function useArrowNavigation(containerRef: React.RefObject<HTMLElement>, c
     rtl = useMemo(() => isRtl ?? ("undefined" === typeof document ? false : getComputedStyle(containerRef.current || document.body).direction === "rtl"), [containerRef, isRtl]),
     mutationObserverRef = useRef<MutationObserver | null>(null),
     shouldSnub = useCallback(() => !enabled || !containerRef.current, [enabled, containerRef]),
-    isItemDisabled = useCallback((el: HTMLElement) => (!el ? true : el.hasAttribute("disabled") || el.hasAttribute("aria-disabled")), []),
+    isItemDisabled = useCallback((el: HTMLElement) => !el || el.matches('[disabled],[aria-disabled="true"],[inert],:disabled'), []),
     getItems = useCallback(() => (itemsRef.current = Array.from(containerRef.current?.querySelectorAll<HTMLElement>(selector) || [])), [containerRef, selector]);
 
   const getAbleIndex = useCallback(
@@ -105,8 +105,8 @@ export function useArrowNavigation(containerRef: React.RefObject<HTMLElement>, c
     [shouldSnub, virtual, activeIndex, gridX, gridY, vGridY, loop, rtl, goToIndex, typeahead, typeAhead]
   );
 
-  const latest = useRef({ getItems, updateDOM, activeIndex });
-  useEffect(() => void (latest.current = { getItems, updateDOM, activeIndex }), [getItems, updateDOM, activeIndex]);
+  const latest = useRef({ getItems, updateDOM, activeIndex, calcGrid: () => {} });
+  useEffect(() => void (latest.current = { ...latest.current, getItems, updateDOM, activeIndex }), [getItems, updateDOM, activeIndex]);
 
   useEffect(() => void getItems(), [getItems, enabled]);
 
@@ -143,8 +143,8 @@ export function useArrowNavigation(containerRef: React.RefObject<HTMLElement>, c
     const all = itemsRef.current;
     const handleHover = (e: Event) => {
       if (!focusOnHover) return;
-      const el = e.currentTarget as HTMLElement;
-      const i = itemsRef.current?.indexOf(el);
+      const el = e.currentTarget as HTMLElement,
+        i = itemsRef.current?.indexOf(el);
       if (i !== -1) goToIndex(i);
     };
     for (const el of all) el.addEventListener("mouseenter", handleHover);
@@ -153,24 +153,25 @@ export function useArrowNavigation(containerRef: React.RefObject<HTMLElement>, c
     };
   }, [enabled, focusOnHover, goToIndex]);
 
-  useEffect(() => {
-    if (shouldSnub()) return;
-    const observer = (mutationObserverRef.current = new MutationObserver(() => {
-      const { getItems, updateDOM, activeIndex } = latest.current;
-      const oldEl = itemsRef.current[activeIndex];
-      getItems();
-      const newEl = itemsRef.current[activeIndex];
-      updateDOM();
-      if (oldEl && newEl && oldEl === newEl) return;
-      setActiveIndex(-1);
-    }));
-    observer.observe(containerRef.current!, { childList: true, subtree: true });
-    return () => observer.disconnect();
-  }, [shouldSnub, containerRef]);
+  const sync = useCallback(() => {
+    const { getItems, updateDOM, activeIndex } = latest.current;
+    const oldEl = itemsRef.current[activeIndex];
+    getItems();
+    const newEl = itemsRef.current[activeIndex];
+    updateDOM();
+    if (oldEl && newEl && oldEl === newEl) return;
+    setActiveIndex(-1);
+  }, []);
 
   useEffect(() => {
     if (shouldSnub()) return;
-    const all = itemsRef.current;
+    const observer = (mutationObserverRef.current = new MutationObserver(sync));
+    observer.observe(containerRef.current!, { childList: true, subtree: true });
+    return () => observer.disconnect();
+  }, [shouldSnub, containerRef, sync]);
+
+  useEffect(() => {
+    if (shouldSnub()) return;
     const setGrid = (g: Required<Config>["grid"]) => {
       if (g.x) setGridX(g.x);
       if (g.y) setGridY(g.y);
@@ -178,14 +179,19 @@ export function useArrowNavigation(containerRef: React.RefObject<HTMLElement>, c
     };
     setGrid(grid);
     if (grid.x && grid.y && grid.vY) return;
-    const calcGrid = () => setGrid(getGrid(all, !grid.x, !grid.y, !grid.vY));
-    calcGrid();
+    let ancestor: HTMLElement | null = null;
     const resizeObserver = new ResizeObserver(() => calcGrid());
-    resizeObserver.observe(getCommonAncestor(all[0], all[1]) ?? containerRef.current!);
+    const calcGrid = () => {
+      setGrid(getGrid(itemsRef.current, !grid.x, !grid.y, !grid.vY));
+      const next = itemsRef.current.length > 1 ? getCommonAncestor(itemsRef.current[0], itemsRef.current[1]) : containerRef.current;
+      if (next && next !== ancestor) ancestor && resizeObserver.unobserve(ancestor), (ancestor = next), resizeObserver.observe(ancestor);
+    };
+    latest.current.calcGrid = calcGrid;
+    calcGrid();
     return () => resizeObserver.disconnect();
   }, [shouldSnub, containerRef, grid]);
 
   useEffect(() => void (timeout.current && clearTimeout(timeout.current)), []);
 
-  return { gridX, gridY, vGridY, activeIndex, activeItem: useCallback(() => itemsRef.current[activeIndex] ?? null, [activeIndex]), items: useCallback(() => itemsRef.current, []), getAbleIndex, typeAhead, goToIndex, simulateKey };
+  return { gridX, gridY, vGridY, activeIndex, activeItem: useCallback(() => itemsRef.current[activeIndex] ?? null, [activeIndex]), items: useCallback(() => itemsRef.current, []), getAbleIndex, typeAhead, goToIndex, simulateKey, sync };
 }

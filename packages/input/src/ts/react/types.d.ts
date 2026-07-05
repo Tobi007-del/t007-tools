@@ -1,5 +1,5 @@
 import React from "react";
-import { DateType } from "../utils/consts";
+import { DateType } from "../types";
 
 /** React change event alias used by input helpers. */
 export type CE<T> = React.ChangeEvent<T>;

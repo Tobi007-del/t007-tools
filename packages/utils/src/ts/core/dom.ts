@@ -86,7 +86,7 @@ export function getWindow(el: any = window): Window & typeof globalThis {
 import { NOOP } from "sia-reactor";
 
 /** Options for configuring a list renderer */
-export type ListRendererOptions<T> = {
+export type ListRendererOptions<T, El extends HTMLElement = HTMLElement> = {
   /** The container element to render the list into */
   container: HTMLElement;
   /** Function to extract a unique key from each item.
@@ -98,17 +98,23 @@ export type ListRendererOptions<T> = {
    * @param item The item to create a node for
    * @returns An HTMLElement representing the item, or null/undefined to skip rendering
    */
-  createNode: (item: T) => HTMLElement | null | undefined;
+  createNode: (item: T) => El | null | undefined;
   /** Optional function to update an existing node with new item data, called when an item is reused.
    * @param node The existing DOM node for the item
    * @param item The new item data to update the node with
    */
-  updateNode?: (node: HTMLElement, item: T) => void;
+  updateNode?: (node: El, item: T) => void;
   /** Optional function to clean up a DOM node when an item is removed, called before the node is removed from the DOM.
    * @param node The DOM node to be removed
    * @param key The unique key of the item associated with the node
    */
-  destroyNode?: (node: HTMLElement, key: string) => void;
+  destroyNode?: (node: El, key: string) => void;
+  /** Optional function called once during initialization for each existing child node in the container.
+   * Allows seeding the registry with pre-existing markup so nodes are reused instead of destroyed.
+   * @param node The pre-existing DOM node
+   * @param register A callback to register the node with its corresponding item key
+   */
+  initNode?: (node: El, register: (key: string) => void) => void;
 };
 
 /**
@@ -116,26 +122,30 @@ export type ListRendererOptions<T> = {
  * @param param0 The options for configuring the list renderer
  * @returns A function that synchronizes the DOM with the new array of items
  */
-export function createListRenderer<T>({ container, getKey, createNode, updateNode = NOOP, destroyNode = NOOP }: ListRendererOptions<T>) {
-  let nodeRegistry = new Map<string, HTMLElement>();
+export function createListRenderer<T, El extends HTMLElement = HTMLElement>({ container, getKey, createNode, updateNode = NOOP, destroyNode = NOOP, initNode }: ListRendererOptions<T, El>) {
+  let nodeRegistry = new Map<string, El>();
+  if (initNode) {
+    const children = Array.from(container.children) as El[];
+    for (let i = 0, len = children.length; i < len; i++) initNode(children[i], (key) => nodeRegistry.set(key, children[i]));
+  }
   /** Synchronizes the DOM with a new array of items by creating, updating, and removing nodes as necessary while minimizing DOM operations using the L.I.S algorithm.
    * @param array The new array of items to render
    * @param strict If true, throws an error if createNode returns null/undefined for any item; if false, skips rendering that item
    */
   return function syncDOM(array: T[], strict = true): void {
-    const newRegistry = new Map<string, HTMLElement>(),
+    const newRegistry = new Map<string, El>(),
       seenKeys = new Set<string>(),
-      oldPositions = new WeakMap<HTMLElement, number>(),
-      children = Array.from(container.children) as HTMLElement[];
+      oldPositions = new WeakMap<El, number>(),
+      children = Array.from(container.children) as El[];
     for (let i = 0, len = children.length; i < len; i++) oldPositions.set(children[i], i); // Cache old positions for stable nodes
     // STEP 1: Build future node list + validate keys
-    const futureNodes: HTMLElement[] = [],
+    const futureNodes: El[] = [],
       oldIndices: number[] = [];
     for (let i = 0, len = array.length; i < len; i++) {
       const item = array[i],
         key = getKey(item);
       if (seenKeys.has(key)) throw new Error(`[List Renderer] Duplicate key "${key}" detected`);
-      let node: HTMLElement | null | undefined = nodeRegistry.get(key);
+      let node: El | null | undefined = nodeRegistry.get(key);
       if (!node) {
         node = createNode(item); // CREATE
         if (!node) {

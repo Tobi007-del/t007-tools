@@ -72,8 +72,10 @@ export const cancelRAFLoop = (key: string): boolean => (t007._RAFLoopers ? t007.
 export interface LimitedOptions {
   /** Storage key used to persist call counts. */
   key?: string;
-  /** Maximum number of allowed calls. */
+  /** Maximum number of allowed calls. @default 1 */
   maxTimes?: number;
+  /** Only allow calling once per session, regardless of maxTimes. @default true */
+  oncePerSession?: boolean;
 }
 export interface LimitedHandle<T extends (...args: any[]) => any> {
   /** Call the wrapped function with the original arguments. */
@@ -96,14 +98,15 @@ export interface LimitedHandle<T extends (...args: any[]) => any> {
  */
 export function limited<T extends (...args: any[]) => any>(FN_KEY: string, fn: T, opts: LimitedOptions | string = {}): LimitedHandle<T> {
   let count = 0,
-    { key, maxTimes: max = 1 } = isStr(opts) ? { key: opts } : opts;
+    { key, maxTimes: max = 1, oncePerSession = true } = isStr(opts) ? { key: opts } : opts;
   const getReg = () => JSON.parse(localStorage.getItem(FN_KEY) || "{}"),
     setReg = (r: Record<string, number>) => localStorage.setItem(FN_KEY, JSON.stringify(r));
   const handle = (...args: Parameters<T>): ReturnType<T> | void => {
+    if (oncePerSession && count > 0) return undefined;
     if (!key) return count++ < max ? fn(...args) : undefined;
     const r = getReg(),
       c = r[key] || 0;
-    return c < max ? ((r[key] = c + 1), setReg(r), fn(...args)) : undefined;
+    return c < max ? (count++, (r[key] = c + 1), setReg(r), fn(...args)) : undefined;
   };
   handle.left = max - (handle.count = count);
   handle.reset = () => ((count = 0), key && ((r) => (delete r[key], setReg(r)))(getReg()));

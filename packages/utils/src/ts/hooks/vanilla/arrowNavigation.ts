@@ -24,6 +24,8 @@ export type ArrowNavigationHandle = {
   goToIndex: (index: number, e?: KeyEvent) => void;
   /** Simulate directional key navigation with a keyboard-like event. */
   simulateKey: (e: KeyEvent) => void;
+  /** Synchronize the navigation items list with the DOM. */
+  sync: () => void;
   /** Remove listeners/observers and release resources. */
   destroy: () => void;
 };
@@ -42,9 +44,9 @@ export function initArrowNavigation(container: HTMLElement, config: ArrowNavigat
     items: HTMLElement[] = [];
   const enabled = isEnabled ?? virtual,
     roving = rovingTab ?? !virtual,
-    rtl = isRtl ??  ("undefined" === typeof document ? false : getComputedStyle(container).direction === "rtl"),
+    rtl = isRtl ?? ("undefined" === typeof document ? false : getComputedStyle(container).direction === "rtl"),
     shouldSnub = () => !enabled || !container,
-    isItemDisabled = (el?: HTMLElement) => !el || el.hasAttribute("disabled") || el.hasAttribute("aria-disabled"),
+    isItemDisabled = (el?: HTMLElement) => !el || el.matches('[disabled],[aria-disabled="true"],[inert],:disabled'),
     getItems = () => (items = Array.from(container.querySelectorAll<HTMLElement>(selector)));
 
   const getAbleIndex = (targetIndex: number, e: KeyEvent = { key: "ArrowRight", ctrlKey: false }): number | null => {
@@ -135,15 +137,19 @@ export function initArrowNavigation(container: HTMLElement, config: ArrowNavigat
   };
   for (const el of items) el.addEventListener("mouseenter", handleHover);
 
-  const mutationObserver = new MutationObserver(() => {
+  const sync = () => {
     const oldEl = items[activeIndex];
+    for (const el of items) el.removeEventListener("mouseenter", handleHover);
     getItems();
+    for (const el of items) el.addEventListener("mouseenter", handleHover);
+    calcGrid();
     const newEl = items[activeIndex];
     updateDOM();
     if (oldEl && newEl && oldEl === newEl) return;
-    resetActiveIndex();
-    updateDOM();
-  });
+    resetActiveIndex(), updateDOM();
+  };
+
+  const mutationObserver = new MutationObserver(sync);
   mutationObserver.observe(container, { childList: true, subtree: true });
 
   const setGrid = (g: Required<ArrowNavigationConfig>["grid"]) => {
@@ -151,11 +157,14 @@ export function initArrowNavigation(container: HTMLElement, config: ArrowNavigat
     if (g.y !== undefined) gridY = g.y;
     if (g.vY !== undefined) vGridY = g.vY;
   };
-  const calcGrid = () => setGrid(getGrid(items, !grid.x, !grid.y, !grid.vY));
+  let ancestor: HTMLElement | null = null;
+  const resizeObserver = new ResizeObserver(() => calcGrid());
+  const calcGrid = () => {
+    setGrid(getGrid(items, !grid.x, !grid.y, !grid.vY));
+    const next = items.length > 1 ? getCommonAncestor(items[0], items[1]) : container;
+    if (next && next !== ancestor) ancestor && resizeObserver.unobserve(ancestor), (ancestor = next), resizeObserver.observe(ancestor);
+  };
   setGrid(grid), calcGrid();
-  const ancestor = items.length > 1 ? getCommonAncestor(items[0], items[1]) : container;
-  const resizeObserver = new ResizeObserver(calcGrid);
-  if (ancestor) resizeObserver.observe(ancestor);
 
   const destroy = () => {
     for (const el of interactiveEls) el?.removeEventListener("keydown", simulateKey);
@@ -163,10 +172,13 @@ export function initArrowNavigation(container: HTMLElement, config: ArrowNavigat
     for (const el of items) el.removeEventListener("mouseenter", handleHover);
     mutationObserver.disconnect(), resizeObserver.disconnect();
     if (timeout) clearTimeout(timeout);
+    t007._arrownavs!.delete(container);
   };
 
-  const handle = { gridX: () => gridX, gridY: () => gridY, vGridY: () => vGridY, items: () => items, activeIndex: () => activeIndex, activeItem: () => items[activeIndex] ?? null, getAbleIndex, typeAhead, goToIndex, simulateKey, destroy };
+  const handle = { gridX: () => gridX, gridY: () => gridY, vGridY: () => vGridY, items: () => items, activeIndex: () => activeIndex, activeItem: () => items[activeIndex] ?? null, getAbleIndex, typeAhead, goToIndex, simulateKey, sync, destroy };
   return t007._arrownavs.set(container, handle), handle;
 }
 
 export const removeArrowNavigation = (container: HTMLElement) => t007._arrownavs?.get(container)?.destroy();
+
+export const syncArrowNavigation = (container: HTMLElement) => t007._arrownavs?.get(container)?.sync();

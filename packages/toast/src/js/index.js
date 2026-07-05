@@ -1,4 +1,4 @@
-import { isStr, isNum, isObj, isFunc, clamp, uid, bindAllMethods, isInteractive, createEl, loadResource, isDef } from "@t007/utils";
+import { isStr, isNum, isObj, isFunc, clamp, uid, bindAllMethods, isInteractive, createEl, loadResource, isDef, setTimeout, bindCleanupToSignal } from "@t007/utils";
 import "../css/index.css";
 
 class T007_Toast {
@@ -12,10 +12,10 @@ class T007_Toast {
   inactive = true;
   #visiblityChange = () => (this.#shouldUnPause = document.visibilityState === "visible");
   constructor(options) {
-    bindAllMethods(this);
+    bindAllMethods(this), bindCleanupToSignal(this.abort, options.signal);
     this.opts = options;
     t007.toasts.set((this.opts.id ??= uid((this.opts.groupId ??= "t007_toast_"))), this);
-    !isNum(this.opts.delay) ? this.activate() : this.queue.push(setTimeout(this.activate, this.opts.delay));
+    !isNum(this.opts.delay) ? this.activate() : this.queue.push(setTimeout(this.activate, this.opts.delay, this.opts.signal));
     this.update(this.opts);
   }
   activate() {
@@ -26,16 +26,17 @@ class T007_Toast {
   update(options, constructed = this.#constructed) {
     if (!options || !isObj(options) || (constructed && this.inactive)) return this.opts.id;
     try {
+      if (constructed) options.signal !== this.opts.signal && (this.opts.signal.removeEventListener("abort", this.abort), bindCleanupToSignal(this.abort, this.opts.signal));
       this.opts = { ...this.opts, ...options };
       const run = () => (Object.keys(options).forEach((key) => (this[key] = options[key])), (this.#constructed = true), !constructed && (this.position = this.opts.position)); // DOM Operations stalled for perf gains
-      !isNum(this.opts.delay) ? run() : this.queue.push(setTimeout(run, this.opts.delay));
+      !isNum(this.opts.delay) ? run() : this.queue.push(setTimeout(run, this.opts.delay, this.opts.signal));
       this.opts.delay = null;
     } catch (err) {
       console.error("t007 toast update failed:", err);
     }
     return this.opts.id;
   }
-  play = () => setTimeout(() => (this.#isPaused = false));
+  play = () => setTimeout(() => (this.#isPaused = false), 0, this.opts.signal);
   pause = () => (this.#isPaused = true);
   get rootElement() {
     return this.opts.rootElement ?? document.body;
@@ -159,7 +160,7 @@ class T007_Toast {
     if (!this.#constructed) return; // Wait until fully built in memory
     const currContainer = this.toastElement.parentElement,
       container = this.rootElement.querySelector(`:scope > .t007-toast-container[data-position="${value}"]`) || this._createContainer(value);
-    container[this.opts.newestOnTop ? "prepend" : "append"](this.toastElement);
+    !container.contains(this.toastElement) && container[this.opts.newestOnTop ? "prepend" : "append"](this.toastElement);
     this.toastElement.classList.toggle("t007-toast-scoped", this.scoped);
     if (!(currContainer == null || currContainer.hasChildNodes())) currContainer.remove();
   }
@@ -194,7 +195,7 @@ class T007_Toast {
     this.toastElement.dataset.tag = value;
   }
   set renotify(value) {
-    if (value && this.opts.tag) for (const toast of t007.toasts.values()) if (toast.opts.tag === this.opts.tag && toast.opts.id !== this.opts.id) toast.remove("instant");
+    if (value && this.opts.tag) for (const toast of t007.toasts.values()) if (toast.opts.tag === this.opts.tag && toast.opts.id !== this.opts.id) toast.abort();
   }
   get vibrate() {
     return this.opts.vibrate === true ? t007.TOAST_VIBRATIONS[this.opts.type] || t007.TOAST_VIBRATIONS.info : this.opts.vibrate;
@@ -205,7 +206,7 @@ class T007_Toast {
   set limit(value) {
     const toastsInContainer = [...(this.toastElement?.parentElement?.children || [])];
     if (!toastsInContainer.length) return;
-    for (let i = 0; i < toastsInContainer.length - value; i++) [...t007.toasts.values()].find((t) => t.toastElement === (this.opts.newestOnTop ? toastsInContainer[toastsInContainer.length - 1 - i] : toastsInContainer[i]))?.remove("instant");
+    for (let i = 0; i < toastsInContainer.length - value; i++) [...t007.toasts.values()].find((t) => t.toastElement === (this.opts.newestOnTop ? toastsInContainer[toastsInContainer.length - 1 - i] : toastsInContainer[i]))?.abort();
   }
   set newestOnTop(value) {
     this.toastElement?.parentElement?.[value ? "prepend" : "append"](this.toastElement);
@@ -251,7 +252,7 @@ class T007_Toast {
   _handleToastPointerUp(e) {
     if (isStr(this._ptrType) && e.pointerType !== this._ptrType) return;
     cancelAnimationFrame(this._ptrRAF);
-    if (Math.abs(this._ptrDeltaX) > this.toastElement.offsetWidth * ((this.opts.dragToClosePercent.x ?? this.opts.dragToClosePercent) / 100) || Math.abs(this._ptrDeltaY) > this.toastElement.offsetHeight * ((this.opts.dragToClosePercent.y ?? this.opts.dragToClosePercent) / 100)) return this.remove("instant");
+    if (Math.abs(this._ptrDeltaX) > this.toastElement.offsetWidth * ((this.opts.dragToClosePercent.x ?? this.opts.dragToClosePercent) / 100) || Math.abs(this._ptrDeltaY) > this.toastElement.offsetHeight * ((this.opts.dragToClosePercent.y ?? this.opts.dragToClosePercent) / 100)) return this.abort();
     this.#isPaused = this._ptrTicker = this._ptrDirSet = this._ptrDir = false;
     this.toastElement.removeEventListener("pointermove", this._handleToastPointerMove, { passive: false });
     for (const prop of ["transition", "transform", "opacity"]) this.toastElement.style.removeProperty(prop);
@@ -266,6 +267,7 @@ class T007_Toast {
     this.toastElement.classList.remove("t007-toast-show");
     this.onClose?.(timeElapsed);
   }
+  abort = () => this.remove("instant", false);
   _createContainer(position) {
     const container = createEl("div", { className: "t007-toast-container" }, { position });
     container.style.setProperty("--t007-toast-container-position", !this.scoped ? "fixed" : "absolute");
@@ -292,7 +294,8 @@ export const toasting = {
   update(base, id, options, _toast) {
     const toast = _toast ?? t007.toasts.get(id);
     if (toast?.queue) for (const tid of toast.queue) clearTimeout(tid); // remove all delays and maybe make a new toast
-    return toast && (toast.inactive ? base(options.render, { ...toast.opts, id, ...options }) : toast.update(options));
+    if (toast && toast.inactive) return t007.toasts.delete(id), base(options.render, { ...toast.opts, id, ...options });
+    return toast && toast.update(options);
   },
   message: (base, getDefaults, action, renderOrId, options = {}) => {
     options = { ...options, type: action === "warn" ? "warning" : action };
@@ -348,7 +351,7 @@ export const toasting = {
 
 export const toaster = (defOptions = {}, groupId = "t007_toast_") => {
   const getDefaults = () => ({ ...t007.TOAST_DEFAULT_OPTIONS, ...defOptions }),
-    base = (render, options = {}, mayBeId = render?.startsWith?.(groupId)) => new T007_Toast({ ...getDefaults(), ...options, id: mayBeId ? render : options.id, render: mayBeId ? options.render : render, groupId }).opts.id;
+    base = (renderOrId, options = {}, mayBeId = renderOrId?.startsWith?.(groupId), render = mayBeId ? options.render : renderOrId, id = mayBeId ? renderOrId : options.id, toast = t007.toasts.get(id)) => (toast ? toasting.update(base, id, { ...options, render }, toast) : new T007_Toast({ ...getDefaults(), ...options, id, render, groupId }).opts.id);
   base.isActive = (id) => toasting.isActive(base, id);
   base.update = (id, options, _toast) => toasting.update(base, id, options, _toast);
   for (const action of ["info", "success", "warn", "error"]) base[action] = (renderOrId, options) => toasting.message(base, getDefaults, action, renderOrId, options);
@@ -363,11 +366,17 @@ export const toaster = (defOptions = {}, groupId = "t007_toast_") => {
 
 const toast = toaster();
 export default toast;
+// prettier-ignore
+export const TOAST_UI_POSITIONS = [{ value: "top-left", display: "Top Left" }, { value: "top-center", display: "Top Center" }, { value: "top-right", display: "Top Right" }, { value: "center-left", display: "Center Left" }, { value: "center-center", display: "Center Center" }, { value: "center-right", display: "Center Right" }, { value: "bottom-left", display: "Bottom Left" }, { value: "bottom-center", display: "Bottom Center" }, { value: "bottom-right", display: "Bottom Right" }],
+  TOAST_UI_ANIMATIONS = [{ value: "fade", display: "Fade" }, { value: "zoom", display: "Zoom" }, { value: "slide", display: "Slide" }, { value: "slide-left", display: "Slide Left" }, { value: "slide-right", display: "Slide Right" }, { value: "slide-up", display: "Slide Up" }, { value: "slide-down", display: "Slide Down" }],
+  TOAST_UI_TYPES = [{ value: undefined, display: "None" }, { value: "info", display: "Info" }, { value: "success", display: "Success" }, { value: "warning", display: "Warning" }, { value: "error", display: "Error" }],
+  TOAST_UI_DRAG_OPTIONS = [{ value: true, display: "On" }, { value: "mouse", display: "Mouse" }, { value: "touch", display: "Touch" }, { value: "pen", display: "Pen" }, { value: false, display: "Off" }],
+  TOAST_UI_DRAG_DIRECTIONS = [{ value: "x", display: "Horizontal" }, { value: "y", display: "Vertical" }, { value: "xy", display: "Horizontal and Vertical" }, { value: "x|y", display: "Horizontal or Vertical" }, { value: "x||y", display: "Horizontal or Vertical (Locked)" }, { value: "x+", display: "Right" }, { value: "x-", display: "Left" }, { value: "y+", display: "Down" }, { value: "y-", display: "Up" }, { value: "xy+", display: "Right and Down" }, { value: "xy-", display: "Left and Up" }, { value: "x|y+", display: "Right or Down" }, { value: "x|y-", display: "Left or Up" }, { value: "x||y+", display: "Right or Down (Locked)" }, { value: "x||y-", display: "Left or Up (Locked)" }]; // For UI purposes
 
 if ("undefined" !== typeof window) {
   (t007.toast = toast), (t007.toasting = toasting), (t007.toaster = toaster);
   t007.toasts = new Map();
-  (t007.TOAST_DEFAULT_OPTIONS ??= {}), (t007.TOAST_DURATIONS ??= {}), (t007.TOAST_VIBRATIONS ??= {}), (t007.TOAST_ICONS ??= {});
+  (t007.TOAST_DEFAULT_OPTIONS ??= {}), (t007.TOAST_DURATIONS ??= {}), (t007.TOAST_VIBRATIONS ??= {}), (t007.TOAST_ICONS ??= {}), (t007.T0AST_UI_POSITIONS = TOAST_UI_POSITIONS), (t007.TOAST_UI_ANIMATIONS = TOAST_UI_ANIMATIONS), (t007.TOAST_UI_TYPES = TOAST_UI_TYPES), (t007.TOAST_UI_DRAG_OPTIONS = TOAST_UI_DRAG_OPTIONS), (t007.TOAST_UI_DRAG_DIRECTIONS = TOAST_UI_DRAG_DIRECTIONS);
   t007.TOAST_DEFAULT_OPTIONS.render ??= "";
   t007.TOAST_DEFAULT_OPTIONS.type ??= "";
   t007.TOAST_DEFAULT_OPTIONS.icon ??= true;

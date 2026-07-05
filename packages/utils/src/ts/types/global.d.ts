@@ -1,4 +1,5 @@
 import { ArrowNavigationHandle } from "../hooks/vanilla/arrowNavigation";
+import type { FocusTrapHandle } from "../hooks/vanilla/focusTrap";
 import type { ScrollAssistHandle } from "../hooks/vanilla/scrollAssist";
 
 declare global {
@@ -9,12 +10,12 @@ declare global {
     _throttlers?: Map<string, number>;
     _debouncers?: Map<string, number>;
     _RAFLoopers?: Map<string, Function>;
-    _ftrappers?: WeakMap<HTMLElement, () => void>;
+    _ftrappers?: WeakMap<HTMLElement, FocusTrapHandle>;
     _outsiders?: WeakMap<HTMLElement, () => void>;
     _arrownavs?: WeakMap<HTMLElement, ArrowNavigationHandle>;
     _scrollers?: WeakMap<HTMLElement, ScrollAssistHandle>;
-    _ftrappers_stacks?: WeakMap<EventTarget, HTMLElement[]>;
-    _outsiders_stacks?: WeakMap<EventTarget, HTMLElement[]>;
+    _ftrappers_stack?: HTMLElement[];
+    _outsiders_stack?: HTMLElement[];
     _scrollers_r_observer?: ResizeObserver;
     _scrollers_m_observer?: MutationObserver;
   }
