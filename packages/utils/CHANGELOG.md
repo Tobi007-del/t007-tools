@@ -1,5 +1,23 @@
 # @t007/utils
 
+## 0.0.37
+
+### Patch Changes
+
+- Persession over oncePerSession in the utils
+
+## 0.0.36
+
+### Patch Changes
+
+- Slight improvements
+
+## 0.0.35
+
+### Patch Changes
+
+- improvements
+
 ## 0.0.34
 
 ### Patch Changes

@@ -20,7 +20,7 @@ export interface ToastOptions {
   /** Delay before the toast is initialized. */
   delay?: number | null;
   /** Container element used to host toast stacks. */
-  rootElement?: HTMLElement;
+  rootElement?: HTMLElement | null;
   /** Text rendered as the toast body. */
   render?: string | (() => string);
   /** Rich HTML rendered as the toast body. */

@@ -32,10 +32,10 @@ dropZone.addEventListener("drop", async (e) => {
   if (!label) return (draggedType = null);
 
   const required = await confirm("Make this field required?");
-  let placeholder = ["textarea", "text", "email", "password"].includes(draggedType) ? await prompt("Enter placeholder (optional):", "") : "";
+  let placeholder = /^(textarea|text|email|password)$/.test(draggedType) ? await prompt("Enter placeholder (optional):", "") : "";
 
   let options = [];
-  if (["select", "radio", "checkbox"].includes(draggedType)) {
+  if (/^(select|radio|checkbox)$/.test(draggedType)) {
     const opts = await prompt("Enter comma-separated options:", "Option 1,Option 2,Option 3");
     if (!opts) return;
     options = opts
@@ -112,7 +112,7 @@ window.editField = async function editField(id) {
   if (!labelText) return;
 
   let placeholder = "";
-  if (["text", "email", "password", "textarea"].includes(type)) {
+  if (/^(text|email|password|textarea)$/.test(type)) {
     const input = field.querySelector("input, textarea");
     placeholder = await prompt("Edit placeholder (optional):", input.placeholder || "");
     input.placeholder = placeholder;
@@ -120,7 +120,7 @@ window.editField = async function editField(id) {
 
   const required = await confirm("Should this field be required?");
 
-  if (["select", "radio", "checkbox"].includes(type)) {
+  if (/^(select|radio|checkbox)$/.test(type)) {
     const currentOptions = Array.from(field.querySelectorAll("option,input")).map((el) => el.value || el.textContent);
     const newOptions = await prompt("Edit options (comma-separated):", currentOptions.join(", "));
     if (newOptions) {
@@ -173,7 +173,7 @@ window.cloneField = function cloneField(id) {
   const placeholder = field.querySelector("input, textarea")?.placeholder || "";
 
   let options = [];
-  if (["select", "radio", "checkbox"].includes(type)) {
+  if (/^(select|radio|checkbox)$/.test(type)) {
     const inputs = field.querySelectorAll("input, option");
     options = [...inputs].map((i) => i.value).filter(Boolean);
   }

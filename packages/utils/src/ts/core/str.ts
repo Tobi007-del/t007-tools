@@ -34,7 +34,7 @@ export function camelize<T extends string>(str: T = "" as T, { source } = /[\s_-
 
 /** Convert a camelCase or PascalCase string to a separator-based format (e.g. "helloWorld" to "hello-world").
  * @param str The camelCase or PascalCase string to convert.
- * @param separator The string to insert between words. @default  a hyphen ("-").
+ * @param separator The string to insert between words. @default " ".
  * @returns The uncamelized version of the input string with separators.
  * @example
  * uncamelize("helloWorld") // "hello-world"

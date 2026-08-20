@@ -61,7 +61,7 @@ export function loadResource(req: string | symbol, type: ResourceType = "style",
           console.warn(`Retrying ${type} load for "${src}" (${attempts - remaining + 1})...`);
         } else {
           delete win.t007._resourceCache[src]; // Final fail: clear cache so user can manually retry
-          reject(new Error(`${capitalize(type)} load failed for "${src}" after ${attempts - 1} attempts`));
+          reject(new Error(`${capitalize(type)} load failed for "${src}"`)); // after ${attempts - 1} attempts
         }
       };
       const url = retryKey && remaining < attempts ? `${src}${src.includes("?") ? "&" : "?"}_${retryKey}=${Date.now()}` : src;
@@ -102,8 +102,9 @@ export type ListRendererOptions<T, El extends HTMLElement = HTMLElement> = {
   /** Optional function to update an existing node with new item data, called when an item is reused.
    * @param node The existing DOM node for the item
    * @param item The new item data to update the node with
+   * @param index The new index of the item in the array
    */
-  updateNode?: (node: El, item: T) => void;
+  updateNode?: (node: El, item: T, index: number) => void;
   /** Optional function to clean up a DOM node when an item is removed, called before the node is removed from the DOM.
    * @param node The DOM node to be removed
    * @param key The unique key of the item associated with the node
@@ -153,7 +154,7 @@ export function createListRenderer<T, El extends HTMLElement = HTMLElement>({ co
           continue;
         }
         oldIndices.push(-1);
-      } else updateNode(node, item), oldIndices.push(oldPositions.get(node) ?? -1); // REUSE - Store old DOM position
+      } else updateNode(node, item, i), oldIndices.push(oldPositions.get(node) ?? -1); // REUSE - Store old DOM position
       seenKeys.add(key), futureNodes.push(node), newRegistry.set(key, node);
     }
     // STEP 2: Remove dead nodes

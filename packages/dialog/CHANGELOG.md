@@ -1,5 +1,40 @@
 # @t007/dialog
 
+## 0.0.36
+
+### Patch Changes
+
+- Blocked pointer interactions of elements under backdrop
+
+## 0.0.35
+
+### Patch Changes
+
+- Updated dependencies
+  - @t007/utils@0.0.37
+
+## 0.0.34
+
+### Patch Changes
+
+- Type fixes
+
+## 0.0.33
+
+### Patch Changes
+
+- Slight improvements
+- Updated dependencies
+  - @t007/utils@0.0.36
+
+## 0.0.32
+
+### Patch Changes
+
+- improvements
+- Updated dependencies
+  - @t007/utils@0.0.35
+
 ## 0.0.31
 
 ### Patch Changes

@@ -14,6 +14,8 @@ export interface FocusTrapConfig {
   scoped?: boolean;
   /** Passed down to all event listeners used. @default  `true`. */
   capture?: boolean;
+  /** Focus behavior options used in triggering focus. */
+  focusOptions?: FocusOptions;
 }
 
 export interface FocusTrapHandle {
@@ -22,7 +24,7 @@ export interface FocusTrapHandle {
 }
 
 /** Hook to keep focus trapped inside an element until disabled. */
-export function initFocusTrap(el: HTMLElement, { enabled = false, initialSelector = "[data-autofocus]", ringClassName = "focus-outline", root = window, scoped = true, capture = true }: FocusTrapConfig = NIL): FocusTrapHandle | void {
+export function initFocusTrap(el: HTMLElement, { enabled = false, initialSelector = "[data-autofocus]", ringClassName = "focus-outline", root = window, scoped = true, capture = true, focusOptions }: FocusTrapConfig = NIL): FocusTrapHandle | void {
   const stack = (t007._ftrappers_stack ??= []),
     existing = (t007._ftrappers ??= new WeakMap<HTMLElement, FocusTrapHandle>()).get(el);
   if (!enabled || existing) return existing ? existing : undefined;
@@ -33,17 +35,17 @@ export function initFocusTrap(el: HTMLElement, { enabled = false, initialSelecto
     first = createEl("span", { tabIndex: 0 }, { focusGuard: "start" }, { position: "absolute", width: "0", height: "0", pointerEvents: "none" }),
     last = createEl("span", { tabIndex: 0 }, { focusGuard: "end" }, { position: "absolute", width: "0", height: "0", pointerEvents: "none" }),
     getFocusable = (c = el) => [...c.querySelectorAll<HTMLElement>(INTERACTIVE_SELECTOR)],
-    resetFocus = (i = 0, els: any[] | null = getFocusable()) => !recovering && ((recovering = true), els?.length ? els.at(i).focus() : (!el.hasAttribute("tabindex") && (el.tabIndex = -1), el.focus()), (recovering = false)),
+    resetFocus = (i = 0, els: any[] | null = getFocusable()) => !recovering && ((recovering = true), els?.length ? els.at(i).focus(focusOptions) : (!el.hasAttribute("tabindex") && (el.tabIndex = -1), el.focus(focusOptions)), (recovering = false)),
     edgeFocus = (pre = false, rt: HTMLElement = root as any) => {
       if (!scoped) return resetFocus(pre ? -1 : 0);
-      if (rt.hasAttribute("tabindex")) return rt.focus(); // If root is programmatically focusable, fallback and restore natural order.
+      if (rt.hasAttribute("tabindex")) return rt.focus(focusOptions); // If root is programmatically focusable, fallback and restore natural order.
       const items = getFocusable();
       if (!items.length) return resetFocus(0, null); // el can catch focus if it's empty
       const ceil = (document.fullscreenElement || document.querySelector("dialog:modal") || document.body) as HTMLElement; // obeying the top layer
       let p = rt.parentElement || ceil,
         all = getFocusable(p);
       while (p !== ceil && (!all.length || (pre ? rt.contains(all[0]) : rt.contains(all.at(-1)!)))) all = getFocusable((p = p.parentElement || ceil));
-      for (let target, len = all.length, i = all.indexOf(items[pre ? 0 : items.length - 1]) + (pre ? -1 : 1); pre ? i >= 0 : i < len; pre ? i-- : i++) if (!rt.contains((target = all[i]))) return target.focus();
+      for (let target, len = all.length, i = all.indexOf(items[pre ? 0 : items.length - 1]) + (pre ? -1 : 1); pre ? i >= 0 : i < len; pre ? i-- : i++) if (!rt.contains((target = all[i]))) return target.focus(focusOptions);
       (pre ? first : last).blur(); // If no focusable items, blur the guard to block visible focus.
     },
     handleFocusIn = (e: Event) => {
@@ -55,10 +57,10 @@ export function initFocusTrap(el: HTMLElement, { enabled = false, initialSelecto
   first.addEventListener("focus", (e) => (el.contains(e.relatedTarget as Node) ? edgeFocus(true) : resetFocus()), capture), el.prepend(first);
   last.addEventListener("focus", (e) => (el.contains(e.relatedTarget as Node) ? edgeFocus() : resetFocus(-1)), capture), el.append(last);
   root.addEventListener("focusin", handleFocusIn, capture);
-  if (initial || !el.contains(focused)) !initial ? setTimeout(resetFocus) : setTimeout(() => (initial.classList.add(ringClassName), initial.focus(), initial.addEventListener("blur", handleInitialBlur, capture)));
+  if (initial || !el.contains(focused)) !initial ? setTimeout(resetFocus) : setTimeout(() => (initial.classList.add(ringClassName), initial.focus(focusOptions), initial.addEventListener("blur", handleInitialBlur, capture)));
 
   const destroy = () => {
-    focused?.isConnected && focused.focus(), first.remove(), last.remove();
+    focused?.isConnected && focused.focus(focusOptions), first.remove(), last.remove();
     root.removeEventListener("focusin", handleFocusIn, capture);
     initial?.removeEventListener("blur", handleInitialBlur, capture);
     t007._ftrappers!.delete(el), stack.splice(stack.indexOf(el), 1);

@@ -1,5 +1,34 @@
 # @t007/toast
 
+## 0.0.36
+
+### Patch Changes
+
+- Updated dependencies
+  - @t007/utils@0.0.37
+
+## 0.0.35
+
+### Patch Changes
+
+- Actions html support
+
+## 0.0.34
+
+### Patch Changes
+
+- Slight improvements
+- Updated dependencies
+  - @t007/utils@0.0.36
+
+## 0.0.33
+
+### Patch Changes
+
+- improvements
+- Updated dependencies
+  - @t007/utils@0.0.35
+
 ## 0.0.32
 
 ### Patch Changes

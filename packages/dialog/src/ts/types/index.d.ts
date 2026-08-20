@@ -12,7 +12,7 @@ export interface DialogOptions {
   /** Browser behavior for handling dialog closure. @default  "any". */
   closedBy?: HTMLDialogElement["closedBy"];
   /** Render dialog inside a specific root element instead of document body. */
-  rootElement?: HTMLElement;
+  rootElement?: HTMLElement | null;
   /** Whether to restrict interactions to `rootElement` if provided. @default  `true`. */
   scoped?: boolean;
 }
@@ -60,11 +60,11 @@ interface Dialog {
 declare global {
   interface T007Namespace {
     /** Browser alert helper. */
-    alert: typeof Alert;
+    alert: typeof alert;
     /** Browser confirm helper. */
-    confirm: typeof Confirm;
+    confirm: typeof confirm;
     /** Browser prompt helper. */
-    prompt: typeof Prompt;
+    prompt: typeof prompt;
     /** Dialog management object. */
     dialog: Dialog;
   }

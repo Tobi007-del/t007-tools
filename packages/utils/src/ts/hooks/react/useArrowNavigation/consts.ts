@@ -8,7 +8,7 @@ export const NAV_KEYS = [...H_NAV_KEYS, ...V_NAV_KEYS];
 export const DEFAULT_CONFIG: Required<Config> = {
   enabled: null,
   selector: "[data-arrow-item]",
-  focusOnHover: true,
+  focusOnHover: false,
   loop: true,
   virtual: false,
   typeahead: false,

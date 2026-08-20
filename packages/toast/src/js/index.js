@@ -1,4 +1,4 @@
-import { isStr, isNum, isObj, isFunc, clamp, uid, bindAllMethods, isInteractive, createEl, loadResource, isDef, setTimeout, bindCleanupToSignal } from "@t007/utils";
+import { isStr, isNum, isObj, isFunc, clamp, uid, bindAllMethods, createEl, loadResource, isDef, setTimeout, bindCleanupToSignal, INTERACTIVE_SELECTOR } from "@t007/utils";
 import "../css/index.css";
 
 class T007_Toast {
@@ -12,11 +12,11 @@ class T007_Toast {
   inactive = true;
   #visiblityChange = () => (this.#shouldUnPause = document.visibilityState === "visible");
   constructor(options) {
-    bindAllMethods(this), bindCleanupToSignal(this.abort, options.signal);
+    bindAllMethods(this);
     this.opts = options;
     t007.toasts.set((this.opts.id ??= uid((this.opts.groupId ??= "t007_toast_"))), this);
     !isNum(this.opts.delay) ? this.activate() : this.queue.push(setTimeout(this.activate, this.opts.delay, this.opts.signal));
-    this.update(this.opts);
+    this.update(this.opts), bindCleanupToSignal(this.abort, options.signal);
   }
   activate() {
     this.toastElement = createEl("div", { className: `t007-toast${this.scoped ? " t007-toast-scoped" : ""}`, id: this.opts.id, ariaAtomic: "true" }, { groupId: this.opts.groupId });
@@ -74,8 +74,8 @@ class T007_Toast {
       this._setUpBodyHTML();
       this.toastElement.querySelector(".t007-toast-body").insertAdjacentElement("afterend", actionsWrapper() || createEl("div", { className: "t007-toast-actions-wrapper" }));
       const wrapper = actionsWrapper();
-      wrapper.innerHTML = values.map(([label]) => (label ? `<button class="t007-toast-action-button" data-action="${label}">${label}</button>` : "")).join("");
-      wrapper.querySelectorAll(".t007-toast-action-button").forEach((btn, i) => (btn.onclick = (e) => values[i][1]?.(e, this)));
+      wrapper.innerHTML = values.map(([label]) => (label ? `<button class="t007-toast-action-button">${label}</button>` : "")).join("");
+      wrapper.querySelectorAll(".t007-toast-action-button").forEach((btn, i) => ((btn.onclick = (e) => values[i][1]?.(e, this)), (btn.dataset.action = btn.textContent.trim())));
     } else actionsWrapper()?.remove();
   }
   set image(value) {
@@ -219,7 +219,7 @@ class T007_Toast {
   _handleToastPointerStart(e) {
     if (isStr(this._ptrType) && e.pointerType !== this._ptrType) return;
     if (e.touches?.length > 1) return;
-    !isInteractive(e.target) && this.toastElement.setPointerCapture(e.pointerId);
+    !e.target.closest(INTERACTIVE_SELECTOR) && this.toastElement.setPointerCapture(e.pointerId);
     this.#isPaused = true;
     this._ptrTicker = this._ptrDirSet = this._ptrDir = false;
     this._ptrStartX = e.clientX ?? e.targetTouches[0]?.clientX;
@@ -263,8 +263,8 @@ class T007_Toast {
     document.removeEventListener("visibilitychange", this.#visiblityChange);
     cancelAnimationFrame(this.#autoCloseInterval), cancelAnimationFrame(this.#progressInterval);
     if (this.inactive || manner === "instant" || !this.animation) this._cleanUpToast();
-    else this.toastElement.onanimationend = this._cleanUpToast;
-    this.toastElement.classList.remove("t007-toast-show");
+    else if (this.toastElement) this.toastElement.onanimationend = this._cleanUpToast;
+    this.toastElement?.classList.remove("t007-toast-show");
     this.onClose?.(timeElapsed);
   }
   abort = () => this.remove("instant", false);
