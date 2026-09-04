@@ -28,21 +28,17 @@ export function throttle(key: string, fn: Function, delay = 30, strict: ((fn: Fu
  * @param key Unique identifier for the debounced function, used to track pending calls.
  * @param fn Function to be debounced.
  * @param delay Time in milliseconds to wait after the latest call before invoking the function. @default  `30ms`.
- * @param strict If `true`, exact timestamp difference between calls will be used else pending timeout is reset each call for practical thread leniency. @default  `true`.
+ * @param strict If `true`, the function will execute immediately on the leading edge of the delay period instead of the trailing edge. @default  `false`.
  * @param signal Optional `AbortSignal` to automatically clear scheduled debounce execution when aborted.
  * @param win Optional `Window` object for scheduling/clearing the debounce timeout, useful for testing or if running in a non-browser environment.
  */
-export function debounce(key: string, fn: Function, delay = 30, strict = true, signal?: AbortSignal, win?: Window): void {
-  const debounceMap = (t007._debouncers ??= new Map<string, number>());
-  if (strict) {
-    const now = performance.now(),
-      prev = debounceMap.get(key) ?? 0;
-    return debounceMap.set(key, now), now - prev < delay ? undefined : fn();
-  }
-  const prevId = debounceMap.get(key);
+export function debounce(key: string, fn: Function, delay = 30, strict = false, signal?: AbortSignal, win?: Window): void {
+  const debounceMap = (t007._debouncers ??= new Map<string, number>()),
+    prevId = debounceMap.get(key),
+    callNow = strict && prevId === undefined;
   prevId !== undefined && (win ?? window).clearTimeout(prevId);
-  const id = setTimeout(() => (debounceMap.delete(key), fn()), delay, signal, win); // practical debounce: reset timer until calls stop
-  return void debounceMap.set(key, id);
+  const id = setTimeout(() => (debounceMap.delete(key), !strict && fn()), delay, signal, win); // practical debounce: reset timer until calls stop
+  return debounceMap.set(key, id), callNow ? fn() : undefined;
 }
 
 /** Creates a loop using `requestAnimationFrame`, allowing for efficient execution of a function on every frame.

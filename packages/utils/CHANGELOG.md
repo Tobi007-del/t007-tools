@@ -1,5 +1,17 @@
 # @t007/utils
 
+## 0.0.39
+
+### Patch Changes
+
+- Dependency update
+
+## 0.0.38
+
+### Patch Changes
+
+- Slight optimizations
+
 ## 0.0.37
 
 ### Patch Changes

@@ -58,7 +58,7 @@ export function loadResource(req: string | symbol, type: ResourceType = "style",
         el?.remove?.(); // Remove failed element before retrying
         if (remaining > 1) {
           setTimeout(tryLoad, 1000, remaining - 1);
-          console.warn(`Retrying ${type} load for "${src}" (${attempts - remaining + 1})...`);
+          console.warn(`Retrying ${type} load for "${src}" (${attempts - remaining + 1}/${attempts})...`);
         } else {
           delete win.t007._resourceCache[src]; // Final fail: clear cache so user can manually retry
           reject(new Error(`${capitalize(type)} load failed for "${src}"`)); // after ${attempts - 1} attempts
