@@ -226,9 +226,16 @@
   overflow: hidden; */
   display: flex;
   flex-direction: column;
+  align-items: center;
   gap: var(--t007-toast-container-gap);
   z-index: 2147483647;
   contain: layout;
+}
+.t007-toast-container[data-position$="-left"] {
+  align-items: flex-start;
+}
+.t007-toast-container[data-position$="-right"] {
+  align-items: flex-end;
 }
 
 .t007-toast-container *:disabled {
@@ -291,6 +298,15 @@
   animation-fill-mode: forwards;
   animation-duration: var(--t007-toast-animation-duration);
   touch-action: none;
+}
+
+.t007-toast.t007-toast-compact {
+  min-width: unset;
+  width: max-content;
+  max-width: var(--t007-toast-width);
+  height: fit-content;
+  min-height: unset;
+  max-height: var(--t007-toast-height);
 }
 
 .t007-toast:not(:has(.t007-toast-image, .t007-toast-icon:not(:empty))):has(.t007-toast-body) {

@@ -1,5 +1,18 @@
 # @t007/toast
 
+## 0.0.40
+
+### Patch Changes
+
+- Compact style fixes
+
+## 0.0.39
+
+### Patch Changes
+
+- Updated dependencies
+  - @t007/utils@0.0.40
+
 ## 0.0.38
 
 ### Patch Changes

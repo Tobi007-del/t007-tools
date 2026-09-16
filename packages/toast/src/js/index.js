@@ -1,10 +1,9 @@
-import { isStr, isNum, isObj, isFunc, clamp, uid, bindAllMethods, createEl, loadResource, isDef, setTimeout, bindCleanupToSignal, INTERACTIVE_SELECTOR } from "@t007/utils";
+import { isStr, isNum, isObj, isFunc, clamp, uid, bindAllMethods, createEl, loadResource, isDef, setTimeout, bindCleanupToSignal, requestAnimationFrame, INTERACTIVE_SELECTOR } from "@t007/utils";
 import "../css/index.css";
 
 class T007_Toast {
   #constructed = false; // to minimize updates
   #autoCloseInterval;
-  #progressInterval;
   #timeVisible = 0;
   #isPaused = false;
   #shouldUnPause;
@@ -20,7 +19,7 @@ class T007_Toast {
   }
   activate() {
     this.toastElement = createEl("div", { className: `t007-toast${this.scoped ? " t007-toast-scoped" : ""}`, id: this.opts.id, ariaAtomic: "true" }, { groupId: this.opts.groupId });
-    requestAnimationFrame(() => this.toastElement.classList.add("t007-toast-show"));
+    requestAnimationFrame(() => this.toastElement.classList.add("t007-toast-show"), this.opts.signal);
     this.inactive = false;
   }
   update(options, constructed = this.#constructed) {
@@ -115,7 +114,7 @@ class T007_Toast {
   }
   set closeButton(value) {
     const btn = this.toastElement.querySelector(".t007-toast-cancel-button");
-    if (value) this.toastElement.append(btn || createEl("button", { title: "Close", ariaLabel: "Close notification", className: "t007-toast-cancel-button", innerHTML: "&times;", onclick: this.remove }));
+    if (value) this.toastElement.append(btn || createEl("button", { title: "Close", ariaLabel: "Close notification", className: "t007-toast-cancel-button", innerHTML: "&times;", onclick: () => this.remove(undefined, false, true) }));
     else btn?.remove();
   }
   get animation() {
@@ -135,6 +134,7 @@ class T007_Toast {
   set autoClose(value) {
     cancelAnimationFrame(this.#autoCloseInterval);
     this.#timeVisible = 0;
+    this.toastElement.classList.toggle("progress", !this.opts.hideProgressBar && isNum(this.autoClose));
     this.nprogress = undefined;
     let lastTime;
     const loop = (time) => {
@@ -144,38 +144,33 @@ class T007_Toast {
       }
       if (lastTime == null) {
         lastTime = time;
-        return (this.#autoCloseInterval = requestAnimationFrame(loop));
+        return (this.#autoCloseInterval = requestAnimationFrame(loop, this.opts.signal));
       }
       if (!this.#isPaused) {
         this.#timeVisible += time - lastTime;
         this.onTimeUpdate?.(this.#timeVisible);
+        if (!this.opts.hideProgressBar) this.nprogress = undefined;
         if (isNum(this.autoClose) && this.#timeVisible >= this.autoClose) return this.remove("smooth", true);
       }
       lastTime = time;
-      this.#autoCloseInterval = requestAnimationFrame(loop);
+      this.#autoCloseInterval = requestAnimationFrame(loop, this.opts.signal);
     };
-    if (value) this.#autoCloseInterval = requestAnimationFrame(loop);
+    if (value) this.#autoCloseInterval = requestAnimationFrame(loop, this.opts.signal);
   }
   set position(value) {
     if (!this.#constructed) return; // Wait until fully built in memory
     const currContainer = this.toastElement.parentElement,
       container = this.rootElement.querySelector(`:scope > .t007-toast-container[data-position="${value}"]`) || this._createContainer(value);
     !container.contains(this.toastElement) && container[this.opts.newestOnTop ? "prepend" : "append"](this.toastElement);
-    this.toastElement.classList.toggle("t007-toast-scoped", this.scoped);
+    this.toastElement.classList.toggle("t007-toast-scoped", this.scoped), (this.animation = true);
     if (!(currContainer == null || currContainer.hasChildNodes())) currContainer.remove();
   }
   set closeOnClick(value) {
-    this.toastElement.onclick = value ? () => this.remove() : null;
+    this.toastElement.onclick = value ? () => this.remove(undefined, false, true) : null;
   }
   set hideProgressBar(value) {
-    this.toastElement.classList.toggle("progress", !value);
-    this.nprogress = undefined;
-    cancelAnimationFrame(this.#progressInterval);
-    const loop = () => {
-      if (isNum(this.autoClose) && !this.#isPaused) this.nprogress = undefined;
-      this.#progressInterval = requestAnimationFrame(loop);
-    };
-    if (!value) this.#progressInterval = requestAnimationFrame(loop);
+    this.toastElement.classList.toggle("progress", !value && isNum(this.autoClose));
+    if (!value && isNum(this.autoClose)) this.nprogress = undefined;
   }
   get nprogress() {
     return Number(this.toastElement.style.getProperty("--progress"));
@@ -204,9 +199,10 @@ class T007_Toast {
     value && navigator?.vibrate?.(this.vibrate);
   }
   set limit(value) {
-    const toastsInContainer = [...(this.toastElement?.parentElement?.children || [])];
-    if (!toastsInContainer.length) return;
-    for (let i = 0; i < toastsInContainer.length - value; i++) [...t007.toasts.values()].find((t) => t.toastElement === (this.opts.newestOnTop ? toastsInContainer[toastsInContainer.length - 1 - i] : toastsInContainer[i]))?.abort();
+    if (!value) return;
+    const els = [...(this.toastElement?.parentElement?.children || [])];
+    if (!els.length) return;
+    for (let i = 0; i < els.length - value; i++) [...t007.toasts.values()].find((t) => t.toastElement === (this.opts.newestOnTop ? els[els.length - 1 - i] : els[i]))?.abort();
   }
   set newestOnTop(value) {
     this.toastElement?.parentElement?.[value ? "prepend" : "append"](this.toastElement);
@@ -215,6 +211,9 @@ class T007_Toast {
     this.toastElement.dataset.dragToClose = this._ptrType = value;
     this.toastElement.onpointerdown = value ? this._handleToastPointerStart : null;
     this.toastElement.onpointerup = value ? this._handleToastPointerUp : null;
+  }
+  set compact(value) {
+    this.toastElement.classList.toggle("t007-toast-compact", !!value);
   }
   _handleToastPointerStart(e) {
     if (isStr(this._ptrType) && e.pointerType !== this._ptrType) return;
@@ -246,28 +245,28 @@ class T007_Toast {
       if (!this._ptrDirSet && !xR && !yR) this._ptrDir = false;
       if (this._ptrDir) this._ptrDirSet = has("||");
       this._ptrTicker = false;
-    });
+    }, this.opts.signal);
     this._ptrTicker = true;
   }
   _handleToastPointerUp(e) {
     if (isStr(this._ptrType) && e.pointerType !== this._ptrType) return;
     cancelAnimationFrame(this._ptrRAF);
-    if (Math.abs(this._ptrDeltaX) > this.toastElement.offsetWidth * ((this.opts.dragToClosePercent.x ?? this.opts.dragToClosePercent) / 100) || Math.abs(this._ptrDeltaY) > this.toastElement.offsetHeight * ((this.opts.dragToClosePercent.y ?? this.opts.dragToClosePercent) / 100)) return this.abort();
+    if (Math.abs(this._ptrDeltaX) > this.toastElement.offsetWidth * ((this.opts.dragToClosePercent.x ?? this.opts.dragToClosePercent) / 100) || Math.abs(this._ptrDeltaY) > this.toastElement.offsetHeight * ((this.opts.dragToClosePercent.y ?? this.opts.dragToClosePercent) / 100)) return this.remove("instant", false, true);
     this.#isPaused = this._ptrTicker = this._ptrDirSet = this._ptrDir = false;
     this.toastElement.removeEventListener("pointermove", this._handleToastPointerMove, { passive: false });
     for (const prop of ["transition", "transform", "opacity"]) this.toastElement.style.removeProperty(prop);
   }
-  remove(manner = "smooth", timeElapsed = false) {
+  remove(manner = "smooth", timeElapsed = false, userInitiated = false) {
     if (!this.opts.isLoading) t007.toasts.delete(this.opts.id);
     for (const tid of this.queue) clearTimeout(tid);
     document.removeEventListener("visibilitychange", this.#visiblityChange);
-    cancelAnimationFrame(this.#autoCloseInterval), cancelAnimationFrame(this.#progressInterval);
+    cancelAnimationFrame(this.#autoCloseInterval);
     if (this.inactive || manner === "instant" || !this.animation) this._cleanUpToast();
     else if (this.toastElement) this.toastElement.onanimationend = this._cleanUpToast;
     this.toastElement?.classList.remove("t007-toast-show");
-    this.onClose?.(timeElapsed);
+    this.onClose?.(timeElapsed, userInitiated);
   }
-  abort = () => this.remove("instant", false);
+  abort = () => this.remove("instant");
   _createContainer(position) {
     const container = createEl("div", { className: "t007-toast-container" }, { position });
     container.style.setProperty("--t007-toast-container-position", !this.scoped ? "fixed" : "absolute");
@@ -317,19 +316,19 @@ export const toasting = {
     const pendingId = base.loading(pendingCfg.render || "Promise pending...", { ...pendingCfg });
     promise.then(
       (response) => {
-        const successConfig = NFC(success || "Promise resolved", "success");
-        const { render, bodyHTML } = successConfig;
-        if (isFunc(render)) successConfig.render = (txt = response) => render(txt); // preserving as functions that receive the response
-        if (isFunc(bodyHTML)) successConfig.bodyHTML = (txt = response) => bodyHTML(txt);
-        base.success(pendingId, successConfig);
+        const config = NFC(success || "Promise resolved", "success");
+        const { render, bodyHTML } = config;
+        if (isFunc(render)) config.render = (txt = response) => render(txt); // preserving as functions that receive the response
+        if (isFunc(bodyHTML)) config.bodyHTML = (txt = response) => bodyHTML(txt);
+        base.success(pendingId, config);
         return response;
       },
       (err) => {
-        const errorConfig = NFC(error || "Promise rejected", "error");
-        const { render, bodyHTML } = errorConfig;
-        if (isFunc(render)) errorConfig.render = (txt = err) => render(txt);
-        if (isFunc(bodyHTML)) errorConfig.bodyHTML = (txt = err) => bodyHTML(txt);
-        base.error(pendingId, errorConfig);
+        const config = NFC(error || "Promise rejected", "error");
+        const { render, bodyHTML } = config;
+        if (isFunc(render)) config.render = (txt = err) => render(txt);
+        if (isFunc(bodyHTML)) config.bodyHTML = (txt = err) => bodyHTML(txt);
+        base.error(pendingId, config);
         return Promise.reject(err);
       }
     );
@@ -337,6 +336,9 @@ export const toasting = {
   },
   dismiss(base, id, manner, timeElapsed) {
     return !isDef(id) ? base.dismissAll() : t007.toasts.get(id)?.remove(manner, timeElapsed);
+  },
+  anyActive(base, groupId) {
+    return [...t007.toasts.values()].some((toast) => (!isDef(groupId) ? true : toast.opts.groupId === groupId) && base.isActive(toast.opts.id, toast));
   },
   dismissAll(base, groupId) {
     for (const toast of t007.toasts.values()) (!isDef(groupId) ? true : toast.opts.groupId === groupId) && toast.remove();
@@ -349,15 +351,17 @@ export const toasting = {
   },
 };
 
-export const toaster = (defOptions = {}, groupId = "t007_toast_") => {
-  const getDefaults = () => ({ ...t007.TOAST_DEFAULT_OPTIONS, ...defOptions }),
-    base = (renderOrId, options = {}, mayBeId = renderOrId?.startsWith?.(groupId), render = mayBeId ? options.render : renderOrId, id = mayBeId ? renderOrId : options.id, toast = t007.toasts.get(id)) => (toast ? toasting.update(base, id, { ...options, render }, toast) : new T007_Toast({ ...getDefaults(), ...options, id, render, groupId }).opts.id);
+export const toaster = (defaults = {}, groupId = "t007_toast_") => {
+  const getDefaults = () => ({ ...t007.TOAST_DEFAULT_OPTIONS, ...base.defaults, groupId }),
+    base = (renderOrId, options = {}, mayBeId = renderOrId?.startsWith?.(groupId), render = mayBeId ? options.render : renderOrId, id = mayBeId ? renderOrId : options.id, toast = t007.toasts.get(id)) => (toast ? toasting.update(base, id, { ...options, render }, toast) : new T007_Toast({ ...getDefaults(), ...options, id, render }).opts.id);
+  base.defaults = defaults;
   base.isActive = (id) => toasting.isActive(base, id);
   base.update = (id, options, _toast) => toasting.update(base, id, options, _toast);
   for (const action of ["info", "success", "warn", "error"]) base[action] = (renderOrId, options) => toasting.message(base, getDefaults, action, renderOrId, options);
   base.loading = (renderOrId, options) => toasting.loading(base, renderOrId, options);
   base.promise = (promise, config) => toasting.promise(base, promise, config);
   base.dismiss = (id, manner, timeElapsed) => toasting.dismiss(base, id, manner, timeElapsed);
+  base.anyActive = (groupId) => toasting.anyActive(base, groupId);
   base.dismissAll = (groupId) => toasting.dismissAll(base, groupId);
   base.doForAll = (action, options, groupId) => toasting.doForAll(base, action, options, groupId);
   base.getAll = (groupId) => toasting.getAll(base, groupId);
@@ -368,7 +372,7 @@ const toast = toaster();
 export default toast;
 // prettier-ignore
 export const TOAST_UI_POSITIONS = [{ value: "top-left", display: "Top Left" }, { value: "top-center", display: "Top Center" }, { value: "top-right", display: "Top Right" }, { value: "center-left", display: "Center Left" }, { value: "center-center", display: "Center Center" }, { value: "center-right", display: "Center Right" }, { value: "bottom-left", display: "Bottom Left" }, { value: "bottom-center", display: "Bottom Center" }, { value: "bottom-right", display: "Bottom Right" }],
-  TOAST_UI_ANIMATIONS = [{ value: "fade", display: "Fade" }, { value: "zoom", display: "Zoom" }, { value: "slide", display: "Slide" }, { value: "slide-left", display: "Slide Left" }, { value: "slide-right", display: "Slide Right" }, { value: "slide-up", display: "Slide Up" }, { value: "slide-down", display: "Slide Down" }],
+  TOAST_UI_ANIMATIONS = [{ value: "fade", display: "Fade" }, { value: "zoom", display: "Zoom" }, { value: "slide", display: "Slide" }, { value: "slide-left", display: "Slide Left" }, { value: "slide-right", display: "Slide Right" }, { value: "slide-up", display: "Slide Up" }, { value: "slide-down", display: "Slide Down" }, {value: false, display: "None"}],
   TOAST_UI_TYPES = [{ value: undefined, display: "None" }, { value: "info", display: "Info" }, { value: "success", display: "Success" }, { value: "warning", display: "Warning" }, { value: "error", display: "Error" }],
   TOAST_UI_DRAG_OPTIONS = [{ value: true, display: "On" }, { value: "mouse", display: "Mouse" }, { value: "touch", display: "Touch" }, { value: "pen", display: "Pen" }, { value: false, display: "Off" }],
   TOAST_UI_DRAG_DIRECTIONS = [{ value: "x", display: "Horizontal" }, { value: "y", display: "Vertical" }, { value: "xy", display: "Horizontal and Vertical" }, { value: "x|y", display: "Horizontal or Vertical" }, { value: "x||y", display: "Horizontal or Vertical (Locked)" }, { value: "x+", display: "Right" }, { value: "x-", display: "Left" }, { value: "y+", display: "Down" }, { value: "y-", display: "Up" }, { value: "xy+", display: "Right and Down" }, { value: "xy-", display: "Left and Up" }, { value: "x|y+", display: "Right or Down" }, { value: "x|y-", display: "Left or Up" }, { value: "x||y+", display: "Right or Down (Locked)" }, { value: "x||y-", display: "Left or Up (Locked)" }]; // For UI purposes
@@ -397,6 +401,7 @@ if ("undefined" !== typeof window) {
   t007.TOAST_DEFAULT_OPTIONS.animation ??= true; // "fade", "zoom", "slide"|"slide-left"|"slide-right"|"slide-up"|"slide-down"
   t007.TOAST_DEFAULT_OPTIONS.newestOnTop ??= false; // #toaster
   t007.TOAST_DEFAULT_OPTIONS.limit ??= 100; // #toaster
+  t007.TOAST_DEFAULT_OPTIONS.compact ??= false; // #toaster
   (t007.TOAST_DURATIONS.success ??= 2500), (t007.TOAST_DURATIONS.error ??= 4500), (t007.TOAST_DURATIONS.warning ??= 3500), (t007.TOAST_DURATIONS.info ??= 4000); // default
   (t007.TOAST_VIBRATIONS.success ??= [100, 50, 100]), (t007.TOAST_VIBRATIONS.warning ??= [300, 100, 300]), (t007.TOAST_VIBRATIONS.error ??= [500, 200, 500]), (t007.TOAST_VIBRATIONS.info ??= [200]); // Short double buzz, Two long buzzes, Strong long buzz, Single short buzz
   t007.TOAST_ICONS.success ??= `<svg class="no-css-fill" width="24" height="24" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="#27ae60"/><path fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M7 12l3 3l6-6"/></svg>`;

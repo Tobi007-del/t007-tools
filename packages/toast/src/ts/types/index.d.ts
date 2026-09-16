@@ -5,7 +5,7 @@ export type ToastType = undefined | "info" | "success" | "error" | "warning";
 /** Screen anchor for toast placement. */
 export type ToastPosition = "top-left" | "top-center" | "top-right" | "bottom-left" | "bottom-center" | "bottom-right" | "center-left" | "center-center" | "center-right";
 /** Motion preset used when a toast enters or leaves the screen. */
-export type ToastAnimation = "fade" | "zoom" | "slide" | "slide-left" | "slide-right" | "slide-up" | "slide-down" | boolean;
+export type ToastAnimation = "fade" | "zoom" | "slide" | "slide-left" | "slide-right" | "slide-up" | "slide-down" | false;
 /** Allowed pointer types for drag-to-dismiss gestures. */
 export type ToastDragOption = boolean | "mouse" | "touch" | "pen";
 /** Allowed drag directions for dismiss gestures. `|` combines axes where it can be `a` or `b` and can change anytime while `||` does not change after a pick is determined. */
@@ -70,11 +70,13 @@ export interface ToastOptions {
   /** Action buttons rendered under the message body. */
   actions?: Record<string, (e: MouseEvent, toast: ToastInstance) => void> | false;
   /** Callback fired when the toast closes. */
-  onClose?: (timeElapsed?: boolean | false) => void;
+  onClose?: (timeElapsed?: boolean | false, userInitiated?: boolean) => void;
   /** Callback fired as the toast auto-close timer advances. */
   onTimeUpdate?: (timeVisible: number) => void;
   /** Abort signal to control the toast's lifecycle and timeout aborts. */
   signal?: AbortSignal;
+  /** When true, the toast will be displayed in a more compact form. */
+  compact?: boolean;
   // [key: string]: any; // To allow arbitrary overrides internally if needed
 }
 
@@ -130,6 +132,8 @@ export interface ToastPromiseConfig<T = any> {
 
 /** Public toast API exposed to consumers. */
 export interface Toast {
+  /** Default options merged into every toast, update as needed. */
+  defaults: ToastOptions;
   /** Create a default toast.
    * @param render Body text for the toast.
    * @param options Toast configuration.
@@ -189,6 +193,11 @@ export interface Toast {
    * @param timeElapsed Whether the auto-close timer already elapsed.
    */
   dismiss(id?: string, manner?: "smooth" | "instant", timeElapsed?: boolean): void;
+  /** Check if any toasts that share a group id are currently active.
+   * @param groupId Optional group id filter.
+   * @returns True if any toasts are active, false otherwise.
+   */
+  anyActive(groupId?: string): boolean;
   /** Dismiss every toast that matches an optional group id or the whole stack.
    * @param groupId Optional group id filter.
    */
@@ -224,11 +233,11 @@ export interface Toasting {
 /** Internal helper methods used by the toast factory. */
 export const toasting: Toasting;
 /** Create a toast factory with custom defaults and a group id.
- * @param defOptions Default options merged into every toast.
+ * @param defaults Default options merged into every toast.
  * @param groupId Prefix applied to generated ids.
  * @returns Toast factory.
  */
-export function toaster(defOptions?: ToastOptions, groupId?: string): Toast;
+export function toaster(defaults?: ToastOptions, groupId?: string): Toast;
 /** Default toast factory instance attached by the bundle. */
 declare const toast: Toast;
 export default toast;
