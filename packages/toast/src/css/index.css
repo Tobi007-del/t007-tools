@@ -60,11 +60,11 @@
   --t007-toast-image-object-fit: cover;
   --t007-toast-actions-container-width: 65%;
   --t007-toast-actions-container-max-width: fit-content;
-  --t007-toast-actions-container-gap: calc(var(--t007-toast-unit) / 4);
+  --t007-toast-actions-container-gap: calc(var(--t007-toast-unit) / 2);
   --t007-toast-action-button-font-size: calc(var(--t007-toast-font-size) / 1.1);
-  --t007-toast-action-button-padding-inline: calc(var(--t007-toast-unit) / 2.2);
-  --t007-toast-action-button-padding-block: calc(var(--t007-toast-unit) / 3.3);
-  --t007-toast-action-button-border-radius: calc(((var(--t007-toast-action-button-padding-block) * 2) + var(--t007-toast-font-size)) / 2);
+  --t007-toast-action-button-padding-inline: calc(var(--t007-toast-unit) / 1.25);
+  --t007-toast-action-button-padding-block: calc(var(--t007-toast-unit) / 2.25);
+  --t007-toast-action-button-border-radius: 500px; /* pill shape */
   --t007-toast-icon-width: calc(var(--t007-toast-unit) * 1.4);
   --t007-toast-icon-height: calc(var(--t007-toast-unit) * 1.4);
   --t007-toast-icon-font-size: calc(var(--t007-toast-icon-height) * 0.8);

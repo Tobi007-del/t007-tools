@@ -1,5 +1,17 @@
 # @t007/toast
 
+## 0.0.42
+
+### Patch Changes
+
+- Updated toast btn gap
+
+## 0.0.41
+
+### Patch Changes
+
+- Action button styling
+
 ## 0.0.40
 
 ### Patch Changes
