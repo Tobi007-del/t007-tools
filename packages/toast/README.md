@@ -246,7 +246,7 @@ Use generic brand tokens first, then map them to toast variables. This keeps you
 }
 /* 2) Map tokens to toast variables (theme layer) */
 .t007-toast {
-  --t007-toast-type-color: var(--app-text);
+  --t007-toast-color: var(--app-text);
   --t007-toast-background: var(--app-surface);
   --t007-toast-text-shadow: none;
   --t007-toast-text-stroke: 0;

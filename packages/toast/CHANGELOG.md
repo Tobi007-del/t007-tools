@@ -1,5 +1,17 @@
 # @t007/toast
 
+## 0.0.44
+
+### Patch Changes
+
+- Style adjustments
+
+## 0.0.43
+
+### Patch Changes
+
+- Toast Actions Styling fixes
+
 ## 0.0.42
 
 ### Patch Changes

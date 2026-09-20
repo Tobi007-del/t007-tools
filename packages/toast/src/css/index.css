@@ -22,13 +22,13 @@
 }
 
 :where(:root, .t007-toast) {
-  --t007-toast-type-color: whitesmoke;
-  --t007-toast-focus-visible-color: var(--t007-toast-font-color);
+  --t007-toast-color: whitesmoke;
+  --t007-toast-focus-visible-color: var(--t007-toast-color);
   --t007-toast-focus-visible-outline: 2px solid var(--t007-toast-focus-visible-color);
-  --t007-toast-progress-background: var(--t007-toast-type-color);
-  --t007-toast-progress-backdrop-background: rgb(from var(--t007-toast-type-color) r g b / 0);
-  --t007-toast-font-color: var(--t007-toast-type-color);
-  --t007-toast-action-button-color: var(--t007-toast-font-color);
+  --t007-toast-progress-background: var(--t007-toast-color);
+  --t007-toast-progress-backdrop-background: rgb(from var(--t007-toast-color) r g b / 0);
+  --t007-toast-font-color: var(--t007-toast-color);
+  --t007-toast-action-button-color: var(--t007-toast-color);
   --t007-toast-action-button-active-color: var(--t007-toast-action-button-color);
   --t007-toast-action-button-background: rgba(from currentColor r g b / 0.1);
   --t007-toast-action-button-active-background: rgba(from currentColor r g b / 0.2);
@@ -57,13 +57,11 @@
   --t007-toast-image-width: calc(var(--t007-toast-unit) * 3.5);
   --t007-toast-image-height: calc(var(--t007-toast-unit) * 3.5);
   --t007-toast-image-border-radius: calc(var(--t007-toast-border-radius) - (var(--t007-toast-padding) / 2));
-  --t007-toast-image-object-fit: cover;
-  --t007-toast-actions-container-width: 65%;
-  --t007-toast-actions-container-max-width: fit-content;
-  --t007-toast-actions-container-gap: calc(var(--t007-toast-unit) / 2);
+  --t007-toast-image-object-fit: contain;
+  --t007-toast-actions-container-gap: calc(var(--t007-toast-padding) * 0.75);
   --t007-toast-action-button-font-size: calc(var(--t007-toast-font-size) / 1.1);
-  --t007-toast-action-button-padding-inline: calc(var(--t007-toast-unit) / 1.25);
-  --t007-toast-action-button-padding-block: calc(var(--t007-toast-unit) / 2.25);
+  --t007-toast-action-button-padding-inline: calc(var(--t007-toast-unit) / 1.35);
+  --t007-toast-action-button-padding-block: calc(var(--t007-toast-unit) / 2.35);
   --t007-toast-action-button-border-radius: 500px; /* pill shape */
   --t007-toast-icon-width: calc(var(--t007-toast-unit) * 1.4);
   --t007-toast-icon-height: calc(var(--t007-toast-unit) * 1.4);
@@ -303,10 +301,10 @@
 .t007-toast.t007-toast-compact {
   min-width: unset;
   width: max-content;
-  max-width: var(--t007-toast-width);
+  max-width: min(var(--t007-toast-width), var(--t007-toast-max-width));
   height: fit-content;
   min-height: unset;
-  max-height: var(--t007-toast-height);
+  max-height: min(var(--t007-toast-height), var(--t007-toast-max-height));
 }
 
 .t007-toast:not(:has(.t007-toast-image, .t007-toast-icon:not(:empty))):has(.t007-toast-body) {
@@ -373,23 +371,21 @@
   animation-name: t007-zoom-in;
 }
 
-.t007-toast-container .t007-toast:is(.info, .success, .error, .warning) {
-  --t007-toast-font-color: var(--t007-toast-type-color);
-  --t007-toast-progress-background: var(--t007-toast-type-color);
-  --t007-toast-progress-backdrop-background: rgb(from var(--t007-toast-type-color) r g b/0);
-}
-
 .t007-toast-container .t007-toast.info {
-  --t007-toast-type-color: var(--t007-toast-info-color);
+  --t007-toast-font-color: var(--t007-toast-info-color);
 }
 .t007-toast-container .t007-toast.success {
-  --t007-toast-type-color: var(--t007-toast-success-color);
+  --t007-toast-font-color: var(--t007-toast-success-color);
 }
 .t007-toast-container .t007-toast.error {
-  --t007-toast-type-color: var(--t007-toast-error-color);
+  --t007-toast-font-color: var(--t007-toast-error-color);
 }
 .t007-toast-container .t007-toast.warning {
-  --t007-toast-type-color: var(--t007-toast-warning-color);
+  --t007-toast-font-color: var(--t007-toast-warning-color);
+}
+.t007-toast-container .t007-toast:is(.info, .success, .error, .warning) {
+  --t007-toast-progress-background: var(--t007-toast-font-color);
+  --t007-toast-progress-backdrop-background: rgb(from var(--t007-toast-font-color) r g b / 0.1);
 }
 
 .t007-toast.progress::before,
@@ -415,14 +411,16 @@
 .t007-toast-image-wrapper {
   position: relative;
   flex: 0 0 var(--t007-toast-image-width);
+  align-self: stretch;
   width: var(--t007-toast-image-width);
-  height: var(--t007-toast-image-height);
+  height: max(var(--t007-toast-image-height), auto);
   border-radius: var(--t007-toast-image-border-radius);
   overflow: hidden;
 }
 
 .t007-toast-image-wrapper:not(:has(.t007-toast-image)) {
   flex: 0 0 var(--t007-toast-icon-width);
+  align-self: unset;
   width: var(--t007-toast-icon-width);
   height: var(--t007-toast-icon-height);
   margin-left: calc(var(--t007-toast-unit) / 5);
@@ -490,12 +488,14 @@
 }
 
 .t007-toast-actions-wrapper {
-  width: var(--t007-toast-actions-container-width);
-  max-width: var(--t007-toast-actions-container-max-width);
+  flex-shrink: 1;
   display: flex;
   justify-content: center;
   flex-wrap: wrap;
   gap: var(--t007-toast-actions-container-gap);
+}
+.t007-toast-actions-wrapper:has(> :only-child) {
+  flex-shrink: 0;
 }
 
 .t007-toast-action-button {
@@ -510,13 +510,11 @@
   background: var(--t007-toast-action-button-background);
   border: var(--t007-toast-action-button-border);
   border-radius: var(--t007-toast-action-button-border-radius);
-  opacity: 0.9;
   transition: opacity 200ms ease, color 200ms ease, background-color 200ms ease;
 }
 
 .t007-toast-action-button:is(:hover, :focus-visible) {
   cursor: pointer;
-  opacity: 1;
   color: var(--t007-toast-action-button-active-color);
   background: var(--t007-toast-action-button-active-background);
 }

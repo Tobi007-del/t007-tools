@@ -159,11 +159,12 @@ class T007_Toast {
   }
   set position(value) {
     if (!this.#constructed) return; // Wait until fully built in memory
-    const currContainer = this.toastElement.parentElement,
+    const oldContainer = this.toastElement.parentElement,
       container = this.rootElement.querySelector(`:scope > .t007-toast-container[data-position="${value}"]`) || this._createContainer(value);
     !container.contains(this.toastElement) && container[this.opts.newestOnTop ? "prepend" : "append"](this.toastElement);
     this.toastElement.classList.toggle("t007-toast-scoped", this.scoped), (this.animation = true);
-    if (!(currContainer == null || currContainer.hasChildNodes())) currContainer.remove();
+    if (!(oldContainer == null || oldContainer.hasChildNodes())) oldContainer.remove();
+    this.limit = this.opts.limit;
   }
   set closeOnClick(value) {
     this.toastElement.onclick = value ? () => this.remove(undefined, false, true) : null;
@@ -190,7 +191,7 @@ class T007_Toast {
     this.toastElement.dataset.tag = value;
   }
   set renotify(value) {
-    if (value && this.opts.tag) for (const toast of t007.toasts.values()) if (toast.opts.tag === this.opts.tag && toast.opts.id !== this.opts.id) toast.abort();
+    if (value && this.opts.tag) for (const toast of t007.toasts.values()) if (toast.opts.tag === this.opts.tag && toast.opts.id !== this.opts.id && toast.opts.groupId === this.opts.groupId) toast.abort();
   }
   get vibrate() {
     return this.opts.vibrate === true ? t007.TOAST_VIBRATIONS[this.opts.type] || t007.TOAST_VIBRATIONS.info : this.opts.vibrate;
@@ -199,7 +200,7 @@ class T007_Toast {
     value && navigator?.vibrate?.(this.vibrate);
   }
   set limit(value) {
-    if (!value) return;
+    if (!value || !this.#constructed) return;
     const els = [...(this.toastElement?.parentElement?.children || [])];
     if (!els.length) return;
     for (let i = 0; i < els.length - value; i++) [...t007.toasts.values()].find((t) => t.toastElement === (this.opts.newestOnTop ? els[els.length - 1 - i] : els[i]))?.abort();

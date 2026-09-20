@@ -55,9 +55,9 @@ export interface ToastOptions {
   dragToClosePercent?: number | { x?: number; y?: number };
   /** Axis or direction filter used by the drag gesture system. */
   dragToCloseDir?: ToastDragDirection;
-  /** When true and `tag` is provided, any other active toast with the same tag is removed before this toast renders. */
+  /** When `true` and `tag` is provided, any other active toast with the same `tag` and `groupId` is removed. */
   renotify?: boolean;
-  /** Arbitrary tag used for grouping and renotify matching. Does not update by itself; pair with `renotify` to enforce one-toast-per-tag behavior. */
+  /** Used for renotify matching, enforces one-toast-per-tag behavior provided `groupId` matches too. */
   tag?: string | number;
   /** Trigger vibration when the toast appears. */
   vibrate?: boolean | number[];
