@@ -1,6 +1,6 @@
 {
   "name": "@t007/utils",
-  "version": "0.0.42",
+  "version": "0.0.44",
   "description": "High-performance utilities for the t007 ecosystem.",
   "author": "Oketade Oluwatobiloba <tobioketade007@gmail.com>",
   "license": "MIT",
@@ -76,10 +76,10 @@
     "react-dom": "^18.3.1"
   },
   "dependencies": {
-    "sia-reactor": "^0.0.44"
+    "sia-reactor": "^0.0.45"
   },
   "peerDependencies": {
-    "react": "^18.0.0"
+    "react": ">=18.0.0"
   },
   "peerDependenciesMeta": {
     "react": {

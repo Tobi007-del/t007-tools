@@ -41,7 +41,7 @@ export function camelize<T extends string>(str: T = "" as T, { source } = /[\s_-
  * uncamelize("HelloWorld", "_") // "hello_world"
  */
 export function uncamelize<T extends string, S extends string = " ">(str: T, separator: S = " " as S): NoCamelCase<T, S> {
-  return str.replace(/([a-z])([A-Z])/g, `$1${separator}$2`).toLowerCase() as NoCamelCase<T, S>;
+  return str.replace(/(?<=[a-z\d])(?=[A-Z])|(?<=[A-Z])(?=[A-Z][a-z])/g, separator).toLowerCase() as NoCamelCase<T, S>;
 }
 
 // Converters

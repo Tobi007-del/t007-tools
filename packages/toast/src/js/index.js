@@ -218,8 +218,8 @@ class T007_Toast {
   }
   _handleToastPointerStart(e) {
     if (isStr(this._ptrType) && e.pointerType !== this._ptrType) return;
-    if (e.touches?.length > 1) return;
-    !e.target.closest(INTERACTIVE_SELECTOR) && this.toastElement.setPointerCapture(e.pointerId);
+    if (e.touches?.length > 1 || e.target.closest(INTERACTIVE_SELECTOR)) return;
+    this.toastElement.setPointerCapture(e.pointerId);
     this.#isPaused = true;
     this._ptrTicker = this._ptrDirSet = this._ptrDir = false;
     this._ptrStartX = e.clientX ?? e.targetTouches[0]?.clientX;
@@ -231,7 +231,7 @@ class T007_Toast {
     e.preventDefault();
     if (this._ptrTicker) return;
     this._ptrRAF = requestAnimationFrame(() => {
-      const selection = window.getSelection();
+      const selection = (e.view || window).getSelection();
       if (selection?.toString().length && this.toastElement.contains(selection.anchorNode)) return this._handleToastPointerUp(e); // Snub the drag: clear tracking and let the text highlight win
       const has = (str) => this.opts.dragToCloseDir.includes(str),
         x = e.clientX ?? e.targetTouches[0]?.clientX,
