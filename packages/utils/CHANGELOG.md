@@ -1,5 +1,35 @@
 # @t007/utils
 
+## 0.0.49
+
+### Patch Changes
+
+- Deps udpate
+
+## 0.0.48
+
+### Patch Changes
+
+- Deps update
+
+## 0.0.47
+
+### Patch Changes
+
+- Deps update
+
+## 0.0.46
+
+### Patch Changes
+
+- Deps update
+
+## 0.0.45
+
+### Patch Changes
+
+- Deps update
+
 ## 0.0.44
 
 ### Patch Changes
