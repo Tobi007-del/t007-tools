@@ -63,7 +63,8 @@ class T007_Toast {
       this._setUpBodyHTML();
       this.toastElement.querySelector(".t007-toast-body").prepend(bodyText() || createEl("p", { className: "t007-toast-body-text" }));
       const text = bodyText();
-      text.innerHTML = text.dataset.render = isFunc(value) ? value() : value;
+      text.innerHTML = isFunc(value) ? value() : value;
+      text.dataset.render = text.textContent;
     } else bodyText()?.remove();
   }
   set actions(value) {
@@ -211,7 +212,7 @@ class T007_Toast {
   set dragToClose(value) {
     this.toastElement.dataset.dragToClose = this._ptrType = value;
     this.toastElement.onpointerdown = value ? this._handleToastPointerStart : null;
-    this.toastElement.onpointerup = value ? this._handleToastPointerUp : null;
+    this.toastElement.onpointercancel = this.toastElement.onpointerup = value ? this._handleToastPointerUp : null;
   }
   set compact(value) {
     this.toastElement.classList.toggle("t007-toast-compact", !!value);
@@ -224,7 +225,7 @@ class T007_Toast {
     this._ptrTicker = this._ptrDirSet = this._ptrDir = false;
     this._ptrStartX = e.clientX ?? e.targetTouches[0]?.clientX;
     this._ptrStartY = e.clientY ?? e.targetTouches[0]?.clientY;
-    this.toastElement.addEventListener("pointermove", this._handleToastPointerMove, { passive: false });
+    this.toastElement.addEventListener("pointermove", this._handleToastPointerMove);
     this.toastElement.style.setProperty("transition", "none", "important");
   }
   _handleToastPointerMove(e) {
@@ -254,7 +255,7 @@ class T007_Toast {
     cancelAnimationFrame(this._ptrRAF);
     if (Math.abs(this._ptrDeltaX) > this.toastElement.offsetWidth * ((this.opts.dragToClosePercent.x ?? this.opts.dragToClosePercent) / 100) || Math.abs(this._ptrDeltaY) > this.toastElement.offsetHeight * ((this.opts.dragToClosePercent.y ?? this.opts.dragToClosePercent) / 100)) return this.remove("instant", false, true);
     this.#isPaused = this._ptrTicker = this._ptrDirSet = this._ptrDir = false;
-    this.toastElement.removeEventListener("pointermove", this._handleToastPointerMove, { passive: false });
+    this.toastElement.removeEventListener("pointermove", this._handleToastPointerMove);
     for (const prop of ["transition", "transform", "opacity"]) this.toastElement.style.removeProperty(prop);
   }
   remove(manner = "smooth", timeElapsed = false, userInitiated = false) {
