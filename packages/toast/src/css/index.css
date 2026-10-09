@@ -490,7 +490,7 @@
 .t007-toast-actions-wrapper {
   flex-shrink: 1;
   display: flex;
-  justify-content: center;
+  justify-content: flex-end;
   flex-wrap: wrap;
   gap: var(--t007-toast-actions-container-gap);
 }

@@ -42,7 +42,7 @@ export const getCommonAncestor = (first?: HTMLElement | null, second?: HTMLEleme
 export const getGrid = (all: HTMLElement[], x = true, y = true, vY = true) => {
   const len = all.length,
     grid: Config["grid"] = {};
-  if (!len) return grid;
+  if (!len || (!x && !y && !vY)) return grid;
   let cols = all.findIndex((el) => el.offsetTop !== all[0].offsetTop);
   cols = cols > 0 ? cols : len;
   if (x) grid.x = cols;

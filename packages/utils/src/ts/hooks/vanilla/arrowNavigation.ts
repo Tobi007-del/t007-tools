@@ -19,7 +19,7 @@ export type ArrowNavigationHandle = {
   /** Resolve the next enabled index from a directional move. */
   getAbleIndex: (targetIndex: number, e?: KeyEvent) => number | null;
   /** Run type-ahead selection logic. */
-  typeAhead: (key: string) => void;
+  typeAhead: (key: string, e?: KeyEvent) => void;
   /** Move active selection/focus to a target index. */
   goToIndex: (index: number, e?: KeyEvent) => void;
   /** Simulate directional key navigation with a keyboard-like event. */
@@ -88,7 +88,7 @@ export function initArrowNavigation(container: HTMLElement, config: ArrowNavigat
   };
   const resetActiveIndex = (index = -1) => ((activeIndex = index), updateDOM());
 
-  const typeAhead = (key: string) => {
+  const typeAhead = (key: string, e?: KeyEvent) => {
     if (shouldSnub() || !typeahead) return;
     buffer += key.toLowerCase();
     if (timeout) clearTimeout(timeout);
@@ -97,7 +97,7 @@ export function initArrowNavigation(container: HTMLElement, config: ArrowNavigat
     for (let i = 0; i < items.length; i++) {
       const idx = (start + i) % items.length,
         label = (items[idx].getAttribute("data-label") || items[idx].innerText || "").trim().toLowerCase();
-      if (label.startsWith(buffer)) return goToIndex(idx);
+      if (label.startsWith(buffer)) return e?.stopPropagation?.(), goToIndex(idx, e);
     }
   };
 
@@ -108,7 +108,7 @@ export function initArrowNavigation(container: HTMLElement, config: ArrowNavigat
     if (!items.length) return;
     if (virtual && (key === " " || key === "Enter")) return items[activeIndex]?.click();
     if (t?.matches(DEFAULT_CONFIG.inputSelector) && !virtual) return;
-    if (typeahead && key.length === 1 && /^[a-z0-9]$/i.test(key)) return typeAhead(key);
+    if (typeahead && key.length === 1 && !e.ctrlKey && !e.shiftKey && !e.altKey && !e.metaKey && /^[a-z0-9]$/i.test(key)) return typeAhead(key, e);
     if (!NAV_KEYS.includes(key)) return;
     if (!((e.currentTarget as HTMLElement)?.matches(DEFAULT_CONFIG.inputSelector) && gridX <= 1 && H_NAV_KEYS.includes(key))) e.preventDefault?.(), e.stopPropagation?.(); // virtual inputs can allow horizontal :)
     const currIndex = virtual ? activeIndex : items.indexOf(getActiveEl(t?.ownerDocument) as HTMLElement),

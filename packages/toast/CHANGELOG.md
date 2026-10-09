@@ -1,5 +1,13 @@
 # @t007/toast
 
+## 0.0.56
+
+### Patch Changes
+
+- Bug fixes nd deps update
+- Updated dependencies
+  - @t007/utils@0.0.51
+
 ## 0.0.55
 
 ### Patch Changes

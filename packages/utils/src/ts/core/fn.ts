@@ -57,10 +57,10 @@ export function RAFLoop(key: string, fn: Function, signal?: AbortSignal, win?: W
   loop();
 }
 
-/** Cancels a loop created by `RAFLoop`.
- * @param key Unique identifier for the loop to be cancelled.
- * @returns True if the loop was successfully cancelled, false if no loop with the given key exists.
- */
+/** Cancels a throttled/debounced callback, preventing execution if applicable. Returns `true` if a pending call was cancelled, `false` if no pending call with the given key exists. */
+export const cancelTimeout = (type: "throttle" | "debounce", key: string, win = window, _map = t007[`_${type}rs`]): boolean => (!_map ? false : (win.clearTimeout(_map.get(key)), _map.delete(key)));
+
+/** Cancels a loop created by `RAFLoop`. Returns `true` if the loop was successfully cancelled, `false` if no loop with the given key exists. */
 export const cancelRAFLoop = (key: string): boolean => (t007._RAFLoopers ? t007._RAFLoopers.delete(key) : false);
 
 // Limited Call Helpers

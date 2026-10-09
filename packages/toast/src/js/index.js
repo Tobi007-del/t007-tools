@@ -263,7 +263,7 @@ class T007_Toast {
     for (const tid of this.queue) clearTimeout(tid);
     document.removeEventListener("visibilitychange", this.#visiblityChange);
     cancelAnimationFrame(this.#autoCloseInterval);
-    if (this.inactive || manner === "instant" || !this.animation) this._cleanUpToast();
+    if (this.inactive || manner === "instant" || document.visibilityState === "hidden" || !this.animation) this._cleanUpToast();
     else if (this.toastElement) this.toastElement.onanimationend = this._cleanUpToast;
     this.toastElement?.classList.remove("t007-toast-show");
     this.onClose?.(timeElapsed, userInitiated);
@@ -311,11 +311,11 @@ export const toasting = {
       toast = t007.toasts.get(id);
     return (toast ? base.update : base)(id, { closeButton: false, closeOnClick: false, dragToClose: false, ...(options.id ? { render: renderOrId } : null), autoClose: false, ...options, isLoading: options.isLoading || true, type: "" }, toast || undefined);
   },
-  promise(base, promise = new Promise((res, rej) => setTimeout(Math.round(Math.random()) ? res : rej, 3000)), { pending, success, error } = {}) {
+  promise(base, promise = new Promise((res, rej) => setTimeout(Math.round(Math.random()) ? res : rej, 3000)), { pending, success, error, ...rest } = {}) {
     if (!promise || !isFunc(promise.then)) return console.error("toast.promise() requires a valid promise");
-    const NFC = (input, type) => (isStr(input) ? { render: input, type } : isObj(input) ? { ...input, type } : { type });
+    const NFC = (input, type) => ({ ...rest, ...(isStr(input) ? { render: input } : isObj(input) ? input : null), type });
     const pendingCfg = NFC(pending);
-    const pendingId = base.loading(pendingCfg.render || "Promise pending...", { ...pendingCfg });
+    const pendingId = base.loading(pendingCfg.render || "Promise pending...", pendingCfg);
     promise.then(
       (response) => {
         const config = NFC(success || "Promise resolved", "success");

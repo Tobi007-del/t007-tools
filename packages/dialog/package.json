@@ -1,6 +1,6 @@
 {
   "name": "@t007/dialog",
-  "version": "0.0.49",
+  "version": "0.0.51",
   "description": "A lightweight, pure JS dialog system.",
   "author": "Oketade Oluwatobiloba <tobioketade007@gmail.com>",
   "license": "MIT",
@@ -57,7 +57,7 @@
     "accessible"
   ],
   "dependencies": {
-    "@t007/utils": "^0.0.50"
+    "@t007/utils": "^0.0.52"
   },
   "devDependencies": {
     "esbuild-sass-plugin": "^3.7.0"

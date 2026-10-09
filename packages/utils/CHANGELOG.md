@@ -1,5 +1,17 @@
 # @t007/utils
 
+## 0.0.52
+
+### Patch Changes
+
+- Type ahead enhancements
+
+## 0.0.51
+
+### Patch Changes
+
+- Bug fixes nd deps update
+
 ## 0.0.50
 
 ### Patch Changes

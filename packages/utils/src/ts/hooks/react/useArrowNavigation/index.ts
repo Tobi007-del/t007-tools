@@ -70,7 +70,7 @@ export function useArrowNavigation(containerRef: React.RefObject<HTMLElement>, c
   }, [shouldSnub, activeIndex, virtual, activeClass, roving, defaultTabbableIndex, getAbleIndex, isItemDisabled, baseTabIndex]);
 
   const typeAhead = useCallback(
-    (key: string) => {
+    (key: string, e?: KeyEvent) => {
       if (shouldSnub() || !typeahead) return;
       const all = itemsRef.current;
       buffer.current += key.toLowerCase();
@@ -80,7 +80,7 @@ export function useArrowNavigation(containerRef: React.RefObject<HTMLElement>, c
       for (let i = 0; i < all.length; i++) {
         const idx = (start + i) % all.length,
           label = (all[idx].getAttribute("data-label") || all[idx].innerText || "").trim().toLowerCase();
-        if (label.startsWith(buffer.current)) return goToIndex(idx);
+        if (label.startsWith(buffer.current)) return e?.stopPropagation?.(), goToIndex(idx);
       }
     },
     [shouldSnub, typeahead, resetMs, goToIndex, activeIndex]
@@ -95,7 +95,7 @@ export function useArrowNavigation(containerRef: React.RefObject<HTMLElement>, c
       if (!all.length) return;
       if (virtual && (key === " " || key === "Enter")) return all[activeIndex]?.click();
       if (t?.matches(DEFAULT_CONFIG.inputSelector) && !virtual) return;
-      if (typeahead && key.length === 1 && /^[a-z0-9]$/i.test(key)) return typeAhead(key);
+      if (typeahead && key.length === 1 && !e.ctrlKey && !e.shiftKey && !e.altKey && !e.metaKey && /^[a-z0-9]$/i.test(key)) return typeAhead(key, e);
       if (!NAV_KEYS.includes(key)) return;
       if (!((e.currentTarget as HTMLElement)?.matches(DEFAULT_CONFIG.inputSelector) && gridX <= 1 && H_NAV_KEYS.includes(key))) e.preventDefault?.(), e.stopPropagation?.(); // virtual inputs can allow horizontal :)
       const currIndex = virtual ? activeIndex : all.indexOf(getActiveEl(t?.ownerDocument) as HTMLElement),
