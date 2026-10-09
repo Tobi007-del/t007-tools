@@ -1,5 +1,11 @@
 # @t007/dialog
 
+## 0.0.52
+
+### Patch Changes
+
+- Deps update
+
 ## 0.0.50
 
 ### Patch Changes

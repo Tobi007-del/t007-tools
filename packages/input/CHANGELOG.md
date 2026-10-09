@@ -1,5 +1,11 @@
 # @t007/input
 
+## 0.0.51
+
+### Patch Changes
+
+- Deps update
+
 ## 0.0.49
 
 ### Patch Changes

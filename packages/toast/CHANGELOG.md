@@ -1,5 +1,11 @@
 # @t007/toast
 
+## 0.0.58
+
+### Patch Changes
+
+- Deps update
+
 ## 0.0.56
 
 ### Patch Changes
