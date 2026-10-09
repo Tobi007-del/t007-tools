@@ -6,7 +6,7 @@ import { getActiveEl } from "../../../core/dom";
 
 /** A React hook for managing robustarrow-key roving focus navigation. */
 export function useArrowNavigation(containerRef: React.RefObject<HTMLElement>, config: Config = {}) {
-  const { enabled: isEnabled, selector, focusOnHover, loop, virtual, typeahead, rovingTab, resetMs, activeClass, inputSelector, defaultTabbableIndex, baseTabIndex, grid, rtl: isRtl, focusOptions, scrollIntoView, onSelect, onFocusOut } = { ...DEFAULT_CONFIG, ...config },
+  const { enabled: isEnabled, selector, focusOnHover, loop, virtual, typeahead: isTypeahead, rovingTab, resetMs, activeClass, inputSelector, defaultTabbableIndex, baseTabIndex, grid, rtl: isRtl, focusOptions, scrollIntoView, onSelect, onFocusOut } = { ...DEFAULT_CONFIG, ...config },
     [gridX, setGridX] = useState(grid.x || 1),
     [gridY, setGridY] = useState(grid.y || 1),
     [vGridY, setVGridY] = useState(grid.vY || 1),
@@ -69,9 +69,9 @@ export function useArrowNavigation(containerRef: React.RefObject<HTMLElement>, c
     }
   }, [shouldSnub, activeIndex, virtual, activeClass, roving, defaultTabbableIndex, getAbleIndex, isItemDisabled, baseTabIndex]);
 
-  const typeAhead = useCallback(
+  const typeahead = useCallback(
     (key: string, e?: KeyEvent) => {
-      if (shouldSnub() || !typeahead) return;
+      if (shouldSnub() || !isTypeahead) return;
       const all = itemsRef.current;
       buffer.current += key.toLowerCase();
       if (timeout.current) clearTimeout(timeout.current);
@@ -83,7 +83,7 @@ export function useArrowNavigation(containerRef: React.RefObject<HTMLElement>, c
         if (label.startsWith(buffer.current)) return e?.stopPropagation?.(), goToIndex(idx);
       }
     },
-    [shouldSnub, typeahead, resetMs, goToIndex, activeIndex]
+    [shouldSnub, isTypeahead, resetMs, goToIndex, activeIndex]
   );
 
   const simulateKey = useCallback(
@@ -95,14 +95,14 @@ export function useArrowNavigation(containerRef: React.RefObject<HTMLElement>, c
       if (!all.length) return;
       if (virtual && (key === " " || key === "Enter")) return all[activeIndex]?.click();
       if (t?.matches(DEFAULT_CONFIG.inputSelector) && !virtual) return;
-      if (typeahead && key.length === 1 && !e.ctrlKey && !e.shiftKey && !e.altKey && !e.metaKey && /^[a-z0-9]$/i.test(key)) return typeAhead(key, e);
+      if (isTypeahead && key.length === 1 && !e.ctrlKey && !e.shiftKey && !e.altKey && !e.metaKey && /^[a-z0-9]$/i.test(key)) return typeahead(key, e);
       if (!NAV_KEYS.includes(key)) return;
       if (!((e.currentTarget as HTMLElement)?.matches(DEFAULT_CONFIG.inputSelector) && gridX <= 1 && H_NAV_KEYS.includes(key))) e.preventDefault?.(), e.stopPropagation?.(); // virtual inputs can allow horizontal :)
       const currIndex = virtual ? activeIndex : all.indexOf(getActiveEl(t?.ownerDocument) as HTMLElement),
         targetIndex = getTargetIndex({ currIndex, gridX, gridY, vGridY, length: all.length, loop, rtl, key, ctrlKey: e.ctrlKey });
       goToIndex(targetIndex, e);
     },
-    [shouldSnub, virtual, activeIndex, gridX, gridY, vGridY, loop, rtl, goToIndex, typeahead, typeAhead]
+    [shouldSnub, virtual, activeIndex, gridX, gridY, vGridY, loop, rtl, goToIndex, isTypeahead, typeahead]
   );
 
   const latest = useRef({ getItems, updateDOM, activeIndex, calcGrid: () => {} });
@@ -193,5 +193,5 @@ export function useArrowNavigation(containerRef: React.RefObject<HTMLElement>, c
 
   useEffect(() => void (timeout.current && clearTimeout(timeout.current)), []);
 
-  return { gridX, gridY, vGridY, activeIndex, activeItem: useCallback(() => itemsRef.current[activeIndex] ?? null, [activeIndex]), items: useCallback(() => itemsRef.current, []), getAbleIndex, typeAhead, goToIndex, simulateKey, sync };
+  return { gridX, gridY, vGridY, activeIndex, activeItem: useCallback(() => itemsRef.current[activeIndex] ?? null, [activeIndex]), items: useCallback(() => itemsRef.current, []), getAbleIndex, typeahead, goToIndex, simulateKey, sync };
 }

@@ -19,7 +19,7 @@ export type ArrowNavigationHandle = {
   /** Resolve the next enabled index from a directional move. */
   getAbleIndex: (targetIndex: number, e?: KeyEvent) => number | null;
   /** Run type-ahead selection logic. */
-  typeAhead: (key: string, e?: KeyEvent) => void;
+  typeahead: (key: string, e?: KeyEvent) => void;
   /** Move active selection/focus to a target index. */
   goToIndex: (index: number, e?: KeyEvent) => void;
   /** Simulate directional key navigation with a keyboard-like event. */
@@ -34,7 +34,7 @@ export type ArrowNavigationHandle = {
 export function initArrowNavigation(container: HTMLElement, config: ArrowNavigationConfig = {}): ArrowNavigationHandle | void {
   const existing = (t007._arrownavs ??= new WeakMap<HTMLElement, ArrowNavigationHandle>()).get(container);
   if (!config.enabled || existing) return existing ? existing : undefined;
-  const { enabled: isEnabled, selector, focusOnHover, loop, virtual, typeahead, resetMs, activeClass, inputSelector, defaultTabbableIndex, baseTabIndex, grid, rtl: isRtl, focusOptions, scrollIntoView, onSelect, onFocusOut, rovingTab } = { ...DEFAULT_CONFIG, ...config };
+  const { enabled: isEnabled, selector, focusOnHover, loop, virtual, typeahead: isTypeahead, resetMs, activeClass, inputSelector, defaultTabbableIndex, baseTabIndex, grid, rtl: isRtl, focusOptions, scrollIntoView, onSelect, onFocusOut, rovingTab } = { ...DEFAULT_CONFIG, ...config };
   let gridX = grid.x || 1,
     gridY = grid.y || 1,
     vGridY = grid.vY || 1,
@@ -88,8 +88,8 @@ export function initArrowNavigation(container: HTMLElement, config: ArrowNavigat
   };
   const resetActiveIndex = (index = -1) => ((activeIndex = index), updateDOM());
 
-  const typeAhead = (key: string, e?: KeyEvent) => {
-    if (shouldSnub() || !typeahead) return;
+  const typeahead = (key: string, e?: KeyEvent) => {
+    if (shouldSnub() || !isTypeahead) return;
     buffer += key.toLowerCase();
     if (timeout) clearTimeout(timeout);
     timeout = setTimeout(() => (buffer = ""), resetMs);
@@ -108,7 +108,7 @@ export function initArrowNavigation(container: HTMLElement, config: ArrowNavigat
     if (!items.length) return;
     if (virtual && (key === " " || key === "Enter")) return items[activeIndex]?.click();
     if (t?.matches(DEFAULT_CONFIG.inputSelector) && !virtual) return;
-    if (typeahead && key.length === 1 && !e.ctrlKey && !e.shiftKey && !e.altKey && !e.metaKey && /^[a-z0-9]$/i.test(key)) return typeAhead(key, e);
+    if (isTypeahead && key.length === 1 && !e.ctrlKey && !e.shiftKey && !e.altKey && !e.metaKey && /^[a-z0-9]$/i.test(key)) return typeahead(key, e);
     if (!NAV_KEYS.includes(key)) return;
     if (!((e.currentTarget as HTMLElement)?.matches(DEFAULT_CONFIG.inputSelector) && gridX <= 1 && H_NAV_KEYS.includes(key))) e.preventDefault?.(), e.stopPropagation?.(); // virtual inputs can allow horizontal :)
     const currIndex = virtual ? activeIndex : items.indexOf(getActiveEl(t?.ownerDocument) as HTMLElement),
@@ -175,7 +175,7 @@ export function initArrowNavigation(container: HTMLElement, config: ArrowNavigat
     t007._arrownavs!.delete(container);
   };
 
-  const handle = { gridX: () => gridX, gridY: () => gridY, vGridY: () => vGridY, items: () => items, activeIndex: () => activeIndex, activeItem: () => items[activeIndex] ?? null, getAbleIndex, typeAhead, goToIndex, simulateKey, sync, destroy };
+  const handle = { gridX: () => gridX, gridY: () => gridY, vGridY: () => vGridY, items: () => items, activeIndex: () => activeIndex, activeItem: () => items[activeIndex] ?? null, getAbleIndex, typeahead, goToIndex, simulateKey, sync, destroy };
   return t007._arrownavs.set(container, handle), handle;
 }
 

@@ -7,8 +7,8 @@ declare global {
     /** Symbol used to mark virtual resources that should not load a real asset. */
     VIRTUAL_RESOURCE: symbol;
     _resourceCache: Partial<Record<string, Promise<HTMLElement | void>>>;
-    _throttlers?: Map<string, number>;
-    _debouncers?: Map<string, number>;
+    _throttlers?: Map<string, number | string | [number, Window]>;
+    _debouncers?: Map<string, number | [number, Window]>;
     _RAFLoopers?: Map<string, Function>;
     _ftrappers?: WeakMap<HTMLElement, FocusTrapHandle>;
     _outsiders?: WeakMap<HTMLElement, () => void>;

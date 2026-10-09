@@ -54,5 +54,7 @@ export function rippleHandler(e: Pick<PointerEvent, "target" | "currentTarget" |
     for (const evt of ["pointerup", "pointercancel"]) (el.ownerDocument?.defaultView || window).removeEventListener(evt, release);
   };
 
-  for (const evt of ["pointerup", "pointercancel"]) (el.ownerDocument?.defaultView || window).addEventListener(evt, release);
+  if ((e as unknown as Event).type?.endsWith("click")) release(false);
+  else for (const evt of ["pointerup", "pointercancel"]) (el.ownerDocument?.defaultView || window).addEventListener(evt, release);
+  setTimeout(release, maxDuration, true);
 }

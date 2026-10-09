@@ -14,14 +14,14 @@ export { setTimeout, setInterval, requestAnimationFrame };
  * @param win Optional `Window` object for scheduling the throttle timeout, useful for testing or if running in a non-browser environment.
  */
 export function throttle(key: string, fn: Function, delay = 30, strict: ((fn: Function) => number) | boolean = true, signal?: AbortSignal, win?: Window): void {
-  const throttleMap = (t007._throttlers ??= new Map<string, number>());
+  const throttleMap: typeof t007._throttlers = (t007._throttlers ??= new Map());
   if (strict === true) {
     const now = performance.now();
-    return now - (throttleMap.get(key) ?? 0) < delay ? undefined : (throttleMap.set(key, now), fn());
+    return now - (Number(throttleMap.get(key)) || 0) < delay ? undefined : (throttleMap.set(key, String(now)), fn());
   }
   if (throttleMap.has(key)) return;
   const id = strict === false ? setTimeout(() => throttleMap.delete(key), delay, signal, win) : strict(() => throttleMap.delete(key)); // uses timeout so code runs when sync thread is free
-  return throttleMap.set(key, id), fn();
+  return throttleMap.set(key, win && win !== window ? [id, win] : id), fn();
 }
 
 /** Debounces a function, ensuring it's only called after a quiet period of no further calls.
@@ -33,12 +33,13 @@ export function throttle(key: string, fn: Function, delay = 30, strict: ((fn: Fu
  * @param win Optional `Window` object for scheduling/clearing the debounce timeout, useful for testing or if running in a non-browser environment.
  */
 export function debounce(key: string, fn: Function, delay = 30, strict = false, signal?: AbortSignal, win?: Window): void {
-  const debounceMap = (t007._debouncers ??= new Map<string, number>()),
-    prevId = debounceMap.get(key),
-    callNow = strict && prevId === undefined;
-  prevId !== undefined && (win ?? window).clearTimeout(prevId);
+  const debounceMap: typeof t007._debouncers = (t007._debouncers ??= new Map()),
+    prevVal = debounceMap.get(key),
+    isArray = Array.isArray(prevVal),
+    callNow = strict && prevVal === undefined;
+  prevVal !== undefined && (isArray ? prevVal[1] : window).clearTimeout(isArray ? prevVal[0] : prevVal);
   const id = setTimeout(() => (debounceMap.delete(key), !strict && fn()), delay, signal, win); // practical debounce: reset timer until calls stop
-  return debounceMap.set(key, id), callNow ? fn() : undefined;
+  return debounceMap.set(key, win && win !== window ? [id, win] : id), callNow ? fn() : undefined;
 }
 
 /** Creates a loop using `requestAnimationFrame`, allowing for efficient execution of a function on every frame.
@@ -58,7 +59,12 @@ export function RAFLoop(key: string, fn: Function, signal?: AbortSignal, win?: W
 }
 
 /** Cancels a throttled/debounced callback, preventing execution if applicable. Returns `true` if a pending call was cancelled, `false` if no pending call with the given key exists. */
-export const cancelTimeout = (type: "throttle" | "debounce", key: string, win = window, _map = t007[`_${type}rs`]): boolean => (!_map ? false : (win.clearTimeout(_map.get(key)), _map.delete(key)));
+export const cancelTimeout = (type: "throttle" | "debounce", key: string, map = t007[`_${type}rs`]): boolean => {
+  if (!map?.has(key)) return false;
+  const val = map.get(key),
+    isArray = Array.isArray(val);
+  return typeof val !== "string" && (isArray ? val[1] : window).clearTimeout(isArray ? val[0] : val), map.delete(key);
+};
 
 /** Cancels a loop created by `RAFLoop`. Returns `true` if the loop was successfully cancelled, `false` if no loop with the given key exists. */
 export const cancelRAFLoop = (key: string): boolean => (t007._RAFLoopers ? t007._RAFLoopers.delete(key) : false);

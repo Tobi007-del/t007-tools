@@ -1,5 +1,11 @@
 # @t007/utils
 
+## 0.0.54
+
+### Patch Changes
+
+- Timeouts bug fix
+
 ## 0.0.52
 
 ### Patch Changes
