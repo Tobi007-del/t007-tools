@@ -1,6 +1,7 @@
 import { ArrowNavigationHandle } from "../hooks/vanilla/arrowNavigation";
 import type { FocusTrapHandle } from "../hooks/vanilla/focusTrap";
 import type { ScrollAssistHandle } from "../hooks/vanilla/scrollAssist";
+import type { OutsideClickHandle } from "../hooks/vanilla/outsideClick";
 
 declare global {
   interface T007Namespace {
@@ -11,7 +12,7 @@ declare global {
     _debouncers?: Map<string, number | [number, Window]>;
     _RAFLoopers?: Map<string, Function>;
     _ftrappers?: WeakMap<HTMLElement, FocusTrapHandle>;
-    _outsiders?: WeakMap<HTMLElement, () => void>;
+    _outsiders?: WeakMap<HTMLElement, OutsideClickHandle>;
     _arrownavs?: WeakMap<HTMLElement, ArrowNavigationHandle>;
     _scrollers?: WeakMap<HTMLElement, ScrollAssistHandle>;
     _ftrappers_stack?: HTMLElement[];

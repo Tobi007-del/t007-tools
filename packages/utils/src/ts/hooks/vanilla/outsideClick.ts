@@ -1,4 +1,4 @@
-import { isInteractive } from "../../core/dom";
+import { isInteractive, getWindow } from "../../core/dom";
 import { NIL, NOOP } from "sia-reactor";
 
 export interface OutsideClickConfig {
@@ -24,32 +24,47 @@ export interface OutsideClickConfig {
   capture?: boolean;
 }
 
+export interface OutsideClickHandle {
+  destroy: () => void;
+  sync: () => void;
+}
+
 /** Hook to attach outside-click, escape, and optional focus-out handling to an element. */
-export function initOutsideClick(el: HTMLElement, { enabled = false, onOutside = NOOP, outOnClick = true, outOnEscape = true, outOnFocusOut = false, allowBounds = false, allowInputs = false, root = window, scoped = true, capture = true }: OutsideClickConfig = NIL): (() => void) | void {
+export function initOutsideClick(el: HTMLElement, { enabled = false, onOutside = NOOP, outOnClick = true, outOnEscape = true, outOnFocusOut = false, allowBounds = false, allowInputs = false, root = window, scoped = true, capture = true }: OutsideClickConfig = NIL): OutsideClickHandle | void {
   const stack = (t007._outsiders_stack ??= []),
-    existing = (t007._outsiders ??= new WeakMap<HTMLElement, () => void>()).get(el);
+    existing = (t007._outsiders ??= new WeakMap<HTMLElement, OutsideClickHandle>()).get(el);
   if (!enabled || existing) return existing ? existing : undefined;
-  (scoped = scoped && root instanceof HTMLElement), (root = scoped ? root : root === document ? document : window); // reassigning for predictability
+  (scoped = scoped && (root as HTMLElement)?.nodeType === 1), (root = scoped ? root : (root as Document)?.nodeType === 9 ? root : getWindow(el)); // reassigning for predictability
   const onScopedOut = (e: MouseEvent | TouchEvent | FocusEvent, t: Node, p = (e as TouchEvent).touches?.[0] || e, rect = allowBounds ? el.getBoundingClientRect() : null) => {
       if (stack.at(-1) !== el || (allowBounds ? p.clientX >= rect!.left && p.clientX <= rect!.right && p.clientY >= rect!.top && p.clientY <= rect!.bottom : el.contains(t))) return false; // pseudo elements, you can run but you can't hide :)
       return (!scoped ? true : (root as HTMLElement).contains(t)) && onOutside(e); // it's "outside" the dialog content, check if it's within our sandbox or the whole doc.
     },
-    handleClick = ((e: MouseEvent | TouchEvent) => outOnClick && !(allowInputs && isInteractive(e.target)) && onScopedOut(e, e.target as Node)) as EventListener,
-    handleEscape = ((e: KeyboardEvent) => outOnEscape && e.key === "Escape" && !e.ctrlKey && !e.shiftKey && !e.altKey && !e.metaKey && stack.at(-1) === el && onOutside(e)) as EventListener,
-    handleFocusOut = (e: FocusEvent) => outOnFocusOut && !el.contains(e.relatedTarget as Node) && onScopedOut(e, e.relatedTarget as Node);
+    handleClick = ((e: MouseEvent | TouchEvent) => !(allowInputs && isInteractive(e.target)) && onScopedOut(e, e.target as Node)) as EventListener,
+    handleEscape = ((e: KeyboardEvent) => e.key === "Escape" && !e.ctrlKey && !e.shiftKey && !e.altKey && !e.metaKey && stack.at(-1) === el && onOutside(e)) as EventListener,
+    handleFocusOut = (e: FocusEvent) => !el.contains(e.relatedTarget as Node) && onScopedOut(e, e.relatedTarget as Node);
 
-  root.addEventListener("mousedown", handleClick, capture), root.addEventListener("touchstart", handleClick, { passive: true, capture });
-  root.addEventListener("keydown", handleEscape, capture);
-  el.addEventListener("focusout", handleFocusOut, capture);
+  const unbind = () => {
+    outOnClick && (root.removeEventListener("mousedown", handleClick, capture), root.removeEventListener("touchstart", handleClick, capture));
+    outOnEscape && root.removeEventListener("keydown", handleEscape, capture);
+    outOnFocusOut && el.removeEventListener("focusout", handleFocusOut, capture);
+  };
+  const bind = () => {
+    outOnClick && (root.addEventListener("mousedown", handleClick, capture), root.addEventListener("touchstart", handleClick, { passive: true, capture }));
+    outOnEscape && root.addEventListener("keydown", handleEscape, capture);
+    outOnFocusOut && el.addEventListener("focusout", handleFocusOut, capture);
+  };
 
   const destroy = () => {
-    root.removeEventListener("mousedown", handleClick, capture), root.removeEventListener("touchstart", handleClick, capture);
-    root.removeEventListener("keydown", handleEscape, capture);
-    el.removeEventListener("focusout", handleFocusOut, capture);
-    t007._outsiders!.delete(el), stack.splice(stack.indexOf(el), 1);
+    unbind(), t007._outsiders!.delete(el);
+    const idx = stack.indexOf(el);
+    idx !== -1 && stack.splice(idx, 1);
   };
-  return !stack.includes(el) && stack.push(el), t007._outsiders.set(el, destroy), destroy;
+  const handle = { destroy, sync: () => (unbind(), (root = !scoped ? getWindow(el) : root), bind()) };
+  return bind(), !stack.includes(el) && stack.push(el), t007._outsiders!.set(el, handle), handle;
 }
 
 /** Remove outside-click handling from an element. */
-export const removeOutsideClick = (el: HTMLElement) => t007._outsiders?.get(el)?.();
+export const removeOutsideClick = (el: HTMLElement) => t007._outsiders?.get(el)?.destroy();
+
+/** Synchronize outside-click handling for an element. */
+export const syncOutsideClick = (el: HTMLElement) => t007._outsiders?.get(el)?.sync();
