@@ -1,5 +1,23 @@
 # @t007/utils
 
+## 0.0.58
+
+### Patch Changes
+
+- Deps update
+
+## 0.0.57
+
+### Patch Changes
+
+- Limited fn bug fix
+
+## 0.0.56
+
+### Patch Changes
+
+- Deps update
+
 ## 0.0.55
 
 ### Patch Changes

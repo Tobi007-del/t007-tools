@@ -105,14 +105,14 @@ export function limited<T extends (...args: any[]) => any>(FN_KEY: string, fn: T
     setReg = (r: Record<string, number>) => localStorage.setItem(FN_KEY, JSON.stringify(r));
   const handle = (...args: Parameters<T>): ReturnType<T> | void => {
     if (perSession && count >= +perSession) return;
-    if (!key) return count++ < max ? fn(...args) : undefined;
+    if (!key) return count++ < max ? ((handle.left = max - (handle.count = count)), fn(...args)) : undefined;
     const r = getReg(),
       c = r[key] || 0;
-    return c < max ? (count++, (r[key] = c + 1), setReg(r), fn(...args)) : undefined;
+    return c < max ? ((r[key] = c + 1), setReg(r), (handle.left = max - r[key]), (handle.count = ++count), fn(...args)) : undefined;
   };
-  handle.left = max - (handle.count = count);
-  handle.reset = () => ((count = 0), key && ((r) => (delete r[key], setReg(r)))(getReg()));
-  handle.block = () => ((count = max), key && ((r) => ((r[key] = max), setReg(r)))(getReg()));
+  (handle.count = count), (handle.left = max - (key ? getReg()[key] || 0 : count));
+  handle.reset = () => ((count = 0), (handle.left = max), (handle.count = 0), key && ((r) => (delete r[key], setReg(r)))(getReg()));
+  handle.block = () => ((count = max), (handle.left = 0), (handle.count = max), key && ((r) => ((r[key] = max), setReg(r)))(getReg()));
   return handle;
 } // Locally limited fn calls, make a closure with FN_KEY for ease of use
 
