@@ -89,9 +89,8 @@
   transition: filter 200ms ease;
 }
 
-:where(button):hover {
+.t007-dialog :where(button):hover {
   cursor: pointer;
-  filter: brightness(1.15);
 }
 
 html:has(> body > .t007-dialog),

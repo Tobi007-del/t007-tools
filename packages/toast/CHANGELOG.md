@@ -1,5 +1,38 @@
 # @t007/toast
 
+## 0.0.68
+
+### Patch Changes
+
+- Updated dependencies
+  - @t007/utils@0.0.62
+
+## 0.0.67
+
+### Patch Changes
+
+- Updated dependencies
+  - @t007/utils@0.0.61
+
+## 0.0.66
+
+### Patch Changes
+
+- Bug fixes
+
+## 0.0.66
+
+### Patch Changes
+
+- Bug fixes
+
+## 0.0.65
+
+### Patch Changes
+
+- Updated dependencies
+  - @t007/utils@0.0.60
+
 ## 0.0.64
 
 ### Patch Changes

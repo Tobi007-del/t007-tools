@@ -5,7 +5,7 @@ export type ToastType = undefined | "info" | "success" | "error" | "warning";
 /** Screen anchor for toast placement. */
 export type ToastPosition = "top-left" | "top-center" | "top-right" | "bottom-left" | "bottom-center" | "bottom-right" | "center-left" | "center-center" | "center-right";
 /** Motion preset used when a toast enters or leaves the screen. */
-export type ToastAnimation = "fade" | "zoom" | "slide" | "slide-left" | "slide-right" | "slide-up" | "slide-down" | false;
+export type ToastAnimation = boolean | "fade" | "zoom" | "slide" | "slide-left" | "slide-right" | "slide-up" | "slide-down";
 /** Allowed pointer types for drag-to-dismiss gestures. */
 export type ToastDragOption = boolean | "mouse" | "touch" | "pen";
 /** Allowed drag directions for dismiss gestures. `|` combines axes where it can be `a` or `b` and can change anytime while `||` does not change after a pick is determined. */

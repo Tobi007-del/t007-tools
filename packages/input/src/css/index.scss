@@ -190,6 +190,7 @@
   --t007-input-current-background-color: var(--t007-input-focused-background-color);
 }
 
+:is(.t007-input-global-error, [data-global-error], form.t007-input-global-error, form[data-global-error]) .t007-input-field,
 .t007-input-field:where(.t007-input-is-wrapper):where(:has([data-wrapper-error], [contenteditable="true"][data-error])),
 .t007-input-field:where(:has(.t007-input[data-error])) {
   --t007-input-current-color: var(--t007-input-error-color);
@@ -258,6 +259,7 @@
   pointer-events: none;
   text-align: left;
   border-radius: inherit;
+  z-index: -1;
 }
 
 .t007-input-outline > * {
@@ -679,6 +681,7 @@
   border-color: var(--t007-input-radio-checked-border-color);
 }
 
+:is(.t007-input-global-error, [data-global-error], form.t007-input-global-error, form[data-global-error]) .t007-input-field :is(.t007-input-checkbox-box, .t007-input-radio-box),
 .t007-input-field:has(.t007-input:is([type="checkbox"], [type="radio"])[data-error]) :is(.t007-input-checkbox-box, .t007-input-radio-box) {
   border-color: var(--t007-input-error-color);
 }

@@ -74,7 +74,7 @@ var formManager = {
       isTextArea = type === "textarea",
       isCheckboxOrRadio = type === "checkbox" || type === "radio",
       field = createEl("div", { className: `t007-input-field${isWrapper ? " t007-input-is-wrapper" : ""}${indeterminate ? " t007-input-indeterminate" : ""}${!!nativeIcon ? " t007-input-icon-override" : ""}${helperText === false ? " t007-input-no-helper" : ""}${fieldClassName ? ` ${fieldClassName}` : ""}${bleedingEdge ? " t007-input-bleeding-edge" : ""}` }),
-      labelEl = createEl("label", { className: isCheckboxOrRadio ? `t007-input-${type}-wrapper` : "t007-input-wrapper" });
+      labelEl = createEl(isWrapper || (isSelect && bleedingEdge) ? "div" : "label", { className: isCheckboxOrRadio ? `t007-input-${type}-wrapper` : "t007-input-wrapper" });
     field.append(labelEl);
     if (isCheckboxOrRadio) {
       labelEl.innerHTML = `
@@ -241,12 +241,7 @@ var formManager = {
       return Array.prototype.every.call(inputs, (input) => input.checkValidity());
     }
     function toggleFormGlobalError(bool) {
-      form.toggleAttribute("data-global-error", bool);
-      form.querySelectorAll(".t007-input-field").forEach((field) => {
-        field.querySelector(".t007-input")?.toggleAttribute("data-error", bool);
-        const floatingLabel = field.querySelector(".t007-input-floating-label");
-        floatingLabel?.classList.toggle("t007-input-shake", bool), bool && setTimeout(() => floatingLabel?.classList.remove("t007-input-shake"), 520); // we still don't trust you
-      });
+      form.classList.toggle("t007-input-global-error", bool);
     }
   },
 };
@@ -260,7 +255,7 @@ if ("undefined" !== typeof window) {
   t007.handleFormValidation = handleFormValidation;
   window.field ??= t007.field;
   window.handleFormValidation ??= t007.handleFormValidation;
-  console.log("%cT007 Input helpers attached to window!", "color: darkturquoise");
+  console.log("%cT007 Inputs attached to window!", "color: darkturquoise");
   loadResource(T007_INPUT_CSS_SRC);
   t007.FM.init();
 }

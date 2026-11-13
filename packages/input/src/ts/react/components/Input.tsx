@@ -111,7 +111,7 @@ export const Input = React.forwardRef<t007InputElement, InputProps>(function Inp
   useScrollAssist(helperTextWrapperRef, { pxPerSecond: 80 });
   useImperativeHandle(ref, () => inputRef.current as t007InputElement);
 
-  const Wrapper = isWrapper ? "div" : "label";
+  const Wrapper = isWrapper || (type === "select" && bleedingEdge) ? "div" : "label";
   return (
     <div className={`t007-input-field ${fieldClassName}${isWrapper ? " t007-input-is-wrapper" : ""}${indeterminate ? " t007-input-indeterminate" : ""}${nativeIcon ? " t007-input-icon-override" : ""}${helperText === false ? " t007-input-no-helper" : ""}${bleedingEdge ? " t007-input-bleeding-edge" : ""}`}>
       <Wrapper className={type === "checkbox" || type === "radio" ? `t007-input-${type}-wrapper` : "t007-input-wrapper"}>
@@ -136,7 +136,7 @@ export const Input = React.forwardRef<t007InputElement, InputProps>(function Inp
         {isWrapper ? (
           children
         ) : type === "select" ? (
-          <select {...(rExclude(otherProps, unsafeProps) as SA)} ref={inputRef as React.RefObject<HTMLSelectElement>} className={`t007-input ${className}`} data-filled={filled || undefined} data-error={flagError || !!error || undefined} onBlur={(e) => (validateInput(e.target, true), (otherProps as SA).onBlur?.(e))} onInput={(e) => (handleInput(), (otherProps as SA).onInput?.(e))}>
+          <select {...(rExclude(otherProps, unsafeProps) as SA)} ref={inputRef as React.RefObject<HTMLSelectElement>} className={`t007-input ${className}`} data-filled={filled || undefined} data-error={flagError || !!error || undefined} onBlur={(e) => (!e.currentTarget.contains(e.relatedTarget as Node) && (e.relatedTarget as HTMLElement)?.tagName !== "OPTION" && (validateInput(e.target, true), (otherProps as SA).onBlur?.(e)))} onInput={(e) => (handleInput(), (otherProps as SA).onInput?.(e))}>
             {options?.map((option, i) => (
               <option key={i} value={typeof option === "string" ? option : option.value}>
                 {typeof option === "string" ? option : option.option}

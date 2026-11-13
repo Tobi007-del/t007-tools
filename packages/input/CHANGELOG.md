@@ -1,5 +1,38 @@
 # @t007/input
 
+## 0.0.61
+
+### Patch Changes
+
+- Updated dependencies
+  - @t007/utils@0.0.62
+
+## 0.0.60
+
+### Patch Changes
+
+- Updated dependencies
+  - @t007/utils@0.0.61
+
+## 0.0.59
+
+### Patch Changes
+
+- Bug fixes
+
+## 0.0.59
+
+### Patch Changes
+
+- Bug fixes
+
+## 0.0.58
+
+### Patch Changes
+
+- Updated dependencies
+  - @t007/utils@0.0.60
+
 ## 0.0.57
 
 ### Patch Changes
