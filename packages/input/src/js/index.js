@@ -74,7 +74,7 @@ var formManager = {
       isTextArea = type === "textarea",
       isCheckboxOrRadio = type === "checkbox" || type === "radio",
       field = createEl("div", { className: `t007-input-field${isWrapper ? " t007-input-is-wrapper" : ""}${indeterminate ? " t007-input-indeterminate" : ""}${!!nativeIcon ? " t007-input-icon-override" : ""}${helperText === false ? " t007-input-no-helper" : ""}${fieldClassName ? ` ${fieldClassName}` : ""}${bleedingEdge ? " t007-input-bleeding-edge" : ""}` }),
-      labelEl = createEl(isWrapper || (isSelect && bleedingEdge) ? "div" : "label", { className: isCheckboxOrRadio ? `t007-input-${type}-wrapper` : "t007-input-wrapper" });
+      labelEl = createEl(isWrapper ? "div" : "label", { className: isCheckboxOrRadio ? `t007-input-${type}-wrapper` : "t007-input-wrapper" });
     field.append(labelEl);
     if (isCheckboxOrRadio) {
       labelEl.innerHTML = `

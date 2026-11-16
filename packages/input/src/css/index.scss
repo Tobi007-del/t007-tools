@@ -796,6 +796,7 @@
 /* overrides for the native select */
 .t007-input-bleeding-edge :is(#o, select) {
   white-space: nowrap;
+  overflow: hidden;
   @supports (appearance: base-select) {
     &,
     &::picker(select) {

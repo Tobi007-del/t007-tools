@@ -1,5 +1,20 @@
 # @t007/toast
 
+## 0.0.70
+
+### Patch Changes
+
+- Update sia-reactor dependency and feature refinements
+- Updated dependencies
+  - @t007/utils@0.0.64
+
+## 0.0.69
+
+### Patch Changes
+
+- Updated dependencies
+  - @t007/utils@0.0.63
+
 ## 0.0.68
 
 ### Patch Changes

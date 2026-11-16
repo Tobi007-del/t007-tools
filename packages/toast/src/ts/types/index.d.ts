@@ -100,6 +100,8 @@ export interface ToastInstance {
    * @returns Toast id.
    */
   update(options: ToastOptions): string;
+  /** Current progress value (0 to 1). */
+  nprogress?: number;
   /** Resume auto-close progress. */
   play(): void;
   /** Pause auto-close progress. */

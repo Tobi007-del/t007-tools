@@ -111,7 +111,7 @@ export const Input = React.forwardRef<t007InputElement, InputProps>(function Inp
   useScrollAssist(helperTextWrapperRef, { pxPerSecond: 80 });
   useImperativeHandle(ref, () => inputRef.current as t007InputElement);
 
-  const Wrapper = isWrapper || (type === "select" && bleedingEdge) ? "div" : "label";
+  const Wrapper = isWrapper ? "div" : "label";
   return (
     <div className={`t007-input-field ${fieldClassName}${isWrapper ? " t007-input-is-wrapper" : ""}${indeterminate ? " t007-input-indeterminate" : ""}${nativeIcon ? " t007-input-icon-override" : ""}${helperText === false ? " t007-input-no-helper" : ""}${bleedingEdge ? " t007-input-bleeding-edge" : ""}`}>
       <Wrapper className={type === "checkbox" || type === "radio" ? `t007-input-${type}-wrapper` : "t007-input-wrapper"}>
